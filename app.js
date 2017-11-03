@@ -9,30 +9,7 @@ var map;
 //create empty array to store future markers
 var markers = [];
 
-//list my default locations on the map
-var myPlaces = [
-	{title: "Майдан Незалежності", location: {lat: 50.450306, lng: 30.523671}},
-	{title: "Національний стадіон", location: {lat: 50.433141, lng: 30.521461}},
-	{title: "Львівська майстерня шоколаду", location: {lat: 50.4620527, lng: 30.5174828}},
-	{title: "Андріївська церква", location: {lat: 50.4588976, lng: 30.5175638}},
-	{
-		title: "Національний академічний театр російської драми імені Лесі Українки", 
-		location: {lat: 50.4446875, lng: 30.5185154}
-	},
-	{title: "MAFIA", location: {lat: 50.4462805, lng: 30.5106136}},
-	{title: "Львівська майстерня шоколаду", location: {lat: 50.44548, lng: 30.5021633}},
-	{title: "ТЦ 'Гулівер'", location: {lat: 50.4386932, lng: 30.5219517}},
-	{
-		title: "Національний академічний драматичний театр ім. Івана Франка", 
-		location: {lat: 50.445650, lng: 30.528012}
-	},
-	{title: "Музей води", location: {lat: 50.452529, lng: 30.531527}},
-	{title: "Києво-Печерська лавра", location: {lat: 50.434609, lng: 30.557280}},
-	{
-		title: "Київський національний академічний театр оперети", 
-		location: {lat: 50.433575, lng: 30.516494}
-	}
-];
+
 
 
 function initMap() {		
@@ -322,6 +299,40 @@ function initMap() {
 	//initial position of the map
 	var myCenter = {lat: 50.45068, lng: 30.523099};
 	
+	//list my default locations on the map
+	var myPlaces = [
+		{title: "Майдан Незалежності", location: {lat: 50.450306, lng: 30.523671}},
+		{title: "Національний стадіон", location: {lat: 50.433141, lng: 30.521461}},
+		{title: "Львівська майстерня шоколаду", location: {lat: 50.4620527, lng: 30.5174828}},
+		{title: "Андріївська церква", location: {lat: 50.4588976, lng: 30.5175638}},
+		{
+			title: "Національний академічний театр російської драми імені Лесі Українки", 
+			location: {lat: 50.4446875, lng: 30.5185154}
+		},
+		{title: "MAFIA", location: {lat: 50.4462805, lng: 30.5106136}},
+		{title: "Львівська майстерня шоколаду", location: {lat: 50.44548, lng: 30.5021633}},
+		{title: "ТЦ 'Гулівер'", location: {lat: 50.4386932, lng: 30.5219517}},
+		{
+			title: "Національний академічний драматичний театр ім. Івана Франка", 
+			location: {lat: 50.445650, lng: 30.528012}
+		},
+		{title: "Музей води", location: {lat: 50.452529, lng: 30.531527}},
+		{title: "Києво-Печерська лавра", location: {lat: 50.434609, lng: 30.557280}},
+		{
+			title: "Київський національний академічний театр оперети", 
+			location: {lat: 50.433575, lng: 30.516494}
+		}
+	];
+
+
+	// Style the markers a bit. This will be our listing marker icon.
+	var defaultIcon = makeMarkerIcon('ff1a1a');
+	// Create a "highlighted location" marker color for when the user
+	// mouses over the marker.
+	var highlightedIcon = makeMarkerIcon('1aa3ff');
+	
+	
+	
 	
 	// Create a map object, and include the MapTypeId to add
     // to the map type control.
@@ -341,40 +352,58 @@ function initMap() {
 	map.setMapTypeId('styled_map');
 	
 	// Add markers to the array and initialize them on the map
-	/* for (var i =0; i < myPlaces.length; i++){
+	for (var i =0; i < myPlaces.length; i++){
 		var position = myPlaces[i].location;
 		var title = myPlaces[i].title;
 		// Create a marker for each location
 		var marker = new google.maps.Marker({
-			map: map,
 			position: position,
 			title: title,
 			animation: google.maps.Animation.DROP,
-			//icon: defaultIcon,
+			icon: defaultIcon,
 			id: i
 		});
 		
 		markers.push(marker);	
-	} */	
-	
-	
-	// Add markers to the array and initialize them on the map with animation
-	for (var i = 0; i < myPlaces.length; i++){		
-		drop(myPlaces[i], i);
-		//alert(myPlaces[i].title);
+		
+		marker.addListener('mouseover', function() {
+            this.setIcon(highlightedIcon);
+			
+        });
+		
+		marker.addListener('mouseout', function() {
+            this.setIcon(defaultIcon);
+        });
 	}
 	
-	//add listener on menu button to show initial markers listing search results
-	document.getElementById('closebutton').addEventListener('click', function() {
-        addListing(myPlaces);
-    });
 	
-	//add listener on menu button to clean markers listing in search results
-	document.getElementsByClassName('closebtn')[0].addEventListener('click', function() {
-        removeListing();
-    });
+	/*// Add markers to the array and initialize them on the map with animation
+	for (var i = 0; i < myPlaces.length; i++){		
+		addMarkerWithTimeout(myPlaces[i], i * 300);		
+	}*/
+	
+
+		
+	addListing(myPlaces);
+    	
+	mapResultToMarker(markers);
+	
+	
+	// 3 seconds after the center of the map has changed, pan back to the marker.
+	/*map.addListener('center_changed', function() {
+        window.setTimeout(function() {
+            map.panTo(markers[0].getPosition());
+        }, 3000);
+    });*/
+
+        /* marker.addListener('click', function() {
+          map.setZoom(8);
+          map.setCenter(marker.getPosition());
+        }); */
 }
 
+
+//-----------functions--------//
 
 //function to open side search bar with future search results
 function openNav() {
@@ -400,52 +429,30 @@ function closeNav() {
     document.getElementsByClassName("map")[0].style.marginLeft= "0px";
 	document.getElementsByClassName("map")[0].style.width = "100%";
 }
-
-
-//-----------functions--------//
-
-/*//clear all markers when page loads
-function clearMarkers() {
-	for (var i = 0; i < myPlaces.length; i++) {
-		//set marker to invisible
-		//myPlaces[i].setMap(null);
-		
-		var position = myPlaces[i].location;
-		var title = myPlaces[i].title;
-	}
-	myPlaces = [];
-}*/
  
-//animate markers to drop with some interval
-function drop(marker, i) {
-	//set timeout for each marker to appear
-	var timeout = i * 300;
-	addMarkerWithTimeout(marker, timeout);	
+
+ 
+
+function drop() {
+	if (markers.length != 0){
+		for (var i = 0; i < markers.length; i++) {
+			markers[i].setMap(map);		
+		}		
+	} else {
+		alert('Oops, no places in favourites. Go add some...');
+	} 
+	
 }
-
-
-//animate markers by setting timeout of thei appearance
-function addMarkerWithTimeout(marker, timeout) {
-	window.setTimeout(function() {
-		// Create a marker for each location and add to markers array
-		markers.push(new google.maps.Marker({
-			position: marker.location,
-			map: map,
-			title:  marker.title,
-			animation: google.maps.Animation.DROP,
-			//icon: defaultIcon,
-			id: marker.id
-		}));
-	}, timeout);
-}
-
+ 
+ 
 //populate results div in search pane
 function addListing(places) {
 	var searchResults = document.getElementById('results');	
 	
 	for (var i = 0; i < places.length; i++){		
 		var elem = document.createElement('li');
-		var item = document.createElement('h5');				
+		var item = document.createElement('h5');
+		item.classList.add("links");
 		// Set its contents:
         item.appendChild(document.createTextNode(places[i].title));
 		//add it to h5
@@ -455,12 +462,58 @@ function addListing(places) {
 	}
 }
 
-//clear results div when closing seacrh pane
-function removeListing() {
-	var unorderedList = document.getElementById('results');
-	unorderedList.innerHTML = '';	
+
+
+function markerBounce(marker){
+	marker.setAnimation(google.maps.Animation.BOUNCE);
 }
 
 
+
+function mapResultToMarker(markers){	
+	//add listener to results item to indicate matching marker on map when hover 
+	var sideListing = document.getElementsByClassName('links');
+	for(i = 0;  i < sideListing.length; i++){
+		//alert(sideListing[i].innerHTML);		
+		sideListing[i].onmouseover = (function (i) {
+			return function () {
+				this.style.background = 'red';
+				console.log(i);
+				
+					console.log(markers[i].title);
+					markers[i].setAnimation(google.maps.Animation.BOUNCE);
+			};
+		}(i));	
+		
+		
+		sideListing[i].onmouseout = (function (i) {
+			return function () {
+				this.style.background = 'green';
+				console.log(i);
+				
+					console.log(markers[i].title);
+					markers[i].setAnimation(null);
+			};
+		}(i));	
+		
+		
+	
+	}
+}
+
+
+// This function takes in a COLOR, and then creates a new marker
+    // icon of that color. The icon will be 21 px wide by 34 high, have an origin
+    // of 0, 0 and be anchored at 10, 34).
+    function makeMarkerIcon(markerColor) {
+        var markerImage = new google.maps.MarkerImage(
+			'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+			'|40|_|%E2%80%A2',
+			new google.maps.Size(21, 34),
+			new google.maps.Point(0, 0),
+			new google.maps.Point(10, 34),
+			new google.maps.Size(21,34));
+			return markerImage;
+    }
 
 //google.maps.event.addDomListener(window, 'load', drop);

@@ -332,6 +332,7 @@ function initMap() {
 	var highlightedIcon = makeMarkerIcon('1aa3ff');
 	
 	
+	var markerInfoWindow = new google.maps.InfoWindow();
 	
 	
 	// Create a map object, and include the MapTypeId to add
@@ -364,8 +365,14 @@ function initMap() {
 			id: i
 		});
 		
-		markers.push(marker);	
+		markers.push(marker);
+
+		// Create an onclick event to open the large infowindow at each marker.		
+		marker.addListener('click', function(){
+			showInfoWindow(this, markerInfoWindow);
+		});	
 		
+	
 		marker.addListener('mouseover', function() {
             this.setIcon(highlightedIcon);
 			//this.setAnimation(google.maps.Animation.BOUNCE);
@@ -376,6 +383,8 @@ function initMap() {
             this.setIcon(defaultIcon);
 			//this.setAnimation(null);
         });
+		
+		
 	}
 	
 	
@@ -527,6 +536,61 @@ function zoomIn () {
 	map.setZoom(16);
 	map.setCenter(markers[i].getPosition());
 };
+
+
+function showInfoWindow (marker, markerInfoWindow) {
+	
+	// Check to make sure the infowindow is not already opened on this marker.
+	if (markerInfoWindow.marker != marker) {
+		// Clear the infowindow content to give the streetview time to load.
+		markerInfoWindow.setContent('');
+		markerInfoWindow.marker = marker;
+		// Make sure the marker property is cleared if the infowindow is closed.
+		markerInfoWindow.addListener('closeclick', function() {
+			markerInfoWindow.marker = null;
+		});
+		
+		var streetViewService = new google.maps.StreetViewService();
+		var radius = 50;
+		
+		function processSVData(data, status) {
+			if (status === google.maps.StreetViewStatus.OK) {
+				var streetViewLocation = data.location.latLng;
+				
+				var viewHeading = google.maps.geometry.spherical.computeHeading(streetViewLocation, marker.position);
+				markerInfoWindow.setContent('<div>' + marker.title + '</div><div id="pano"></div>');
+				
+				
+				var panorama = new google.maps.StreetViewPanorama(
+					document.getElementById('pano'), {
+						position: streetViewLocation,
+						pov: {
+							heading: viewHeading,
+							pitch: 30
+						},
+						motionTrackingControlOptions: {
+							position: google.maps.ControlPosition.LEFT_BOTTOM
+						}
+					});
+			} else {
+				infowindow.setContent('<div>' + marker.title + '</div>' +
+				'<div>No Street View Found</div>');
+			}		
+		}
+		
+		// Look for a nearby Street View panorama when the map is clicked.
+        // getPanoramaByLocation will return the nearest pano when the
+        // given radius is 50 meters or less.
+		
+		// Use streetview service to get the closest streetview image within
+			// 50 meters of the markers position
+			streetViewService.getPanoramaByLocation(marker.position, radius, processSVData);
+		
+		//markerInfoWindow.setContent(marker.title);
+		// Open the infowindow on the correct marker.
+		markerInfoWindow.open(map, marker);
+	}
+}
 
 
 //google.maps.event.addDomListener(window, 'load', drop);

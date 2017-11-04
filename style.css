@@ -170,3 +170,9 @@ header {
     background: linear-gradient( #007acc, #1aa3ff); /* Standard syntax (must be last) */
 	color: #f1f1f1;	
 }
+
+
+#pano {
+	width: 230px;
+	height: 200px;
+}

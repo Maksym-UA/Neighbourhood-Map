@@ -368,11 +368,13 @@ function initMap() {
 		
 		marker.addListener('mouseover', function() {
             this.setIcon(highlightedIcon);
+			//this.setAnimation(google.maps.Animation.BOUNCE);
 			
         });
 		
 		marker.addListener('mouseout', function() {
             this.setIcon(defaultIcon);
+			//this.setAnimation(null);
         });
 	}
 	
@@ -382,10 +384,11 @@ function initMap() {
 		addMarkerWithTimeout(myPlaces[i], i * 300);		
 	}*/
 	
-
-		
+			
 	addListing(myPlaces);
     	
+	
+		
 	mapResultToMarker(markers);
 	
 	
@@ -440,8 +443,7 @@ function drop() {
 		}		
 	} else {
 		alert('Oops, no places in favourites. Go add some...');
-	} 
-	
+	} 	
 }
  
  
@@ -463,13 +465,6 @@ function addListing(places) {
 }
 
 
-
-function markerBounce(marker){
-	marker.setAnimation(google.maps.Animation.BOUNCE);
-}
-
-
-
 function mapResultToMarker(markers){	
 	//add listener to results item to indicate matching marker on map when hover 
 	var sideListing = document.getElementsByClassName('links');
@@ -478,10 +473,9 @@ function mapResultToMarker(markers){
 		sideListing[i].onmouseover = (function (i) {
 			return function () {
 				this.style.background = 'red';
-				console.log(i);
-				
-					console.log(markers[i].title);
-					markers[i].setAnimation(google.maps.Animation.BOUNCE);
+				//console.log(i);
+				//console.log(markers[i].title);
+				markers[i].setAnimation(google.maps.Animation.BOUNCE);
 			};
 		}(i));	
 		
@@ -489,31 +483,50 @@ function mapResultToMarker(markers){
 		sideListing[i].onmouseout = (function (i) {
 			return function () {
 				this.style.background = 'green';
-				console.log(i);
-				
-					console.log(markers[i].title);
-					markers[i].setAnimation(null);
+				//console.log(i);				
+				//console.log(markers[i].title);
+				markers[i].setAnimation(null);
 			};
 		}(i));	
-		
-		
-	
+
+		sideListing[i].onclick = (function (i) {
+			return function () {
+				this.style.background = 'green';
+				//console.log(i);				
+				//alert(markers[i].title);
+				markers[i].setAnimation(google.maps.Animation.DROP);
+				map.setZoom(16);
+				map.setCenter(markers[i].getPosition());
+			};
+		}(i));		
 	}
 }
 
 
 // This function takes in a COLOR, and then creates a new marker
-    // icon of that color. The icon will be 21 px wide by 34 high, have an origin
-    // of 0, 0 and be anchored at 10, 34).
-    function makeMarkerIcon(markerColor) {
-        var markerImage = new google.maps.MarkerImage(
-			'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
-			'|40|_|%E2%80%A2',
-			new google.maps.Size(21, 34),
-			new google.maps.Point(0, 0),
-			new google.maps.Point(10, 34),
-			new google.maps.Size(21,34));
-			return markerImage;
-    }
+// icon of that color. The icon will be 21 px wide by 34 high, have an origin
+// of 0, 0 and be anchored at 10, 34).
+function makeMarkerIcon(markerColor) {
+	var markerImage = new google.maps.MarkerImage(
+		'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+		'|40|_|%E2%80%A2',
+		new google.maps.Size(21, 34),
+		new google.maps.Point(0, 0),
+		new google.maps.Point(10, 34),
+		new google.maps.Size(21,34));
+		return markerImage;
+}
+
+
+
+function zoomIn () {
+	
+	//console.log(i);				
+	//alert(markers[i].title);
+	markers[i].setAnimation(null);
+	map.setZoom(16);
+	map.setCenter(markers[i].getPosition());
+};
+
 
 //google.maps.event.addDomListener(window, 'load', drop);

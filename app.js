@@ -10,6 +10,7 @@ var map;
 var markers = [];
 
 
+var geocoder;
 
 
 function initMap() {		
@@ -334,6 +335,8 @@ function initMap() {
 	
 	var markerInfoWindow = new google.maps.InfoWindow();
 	
+	geocoder = new google.maps.Geocoder();
+	
 	
 	// Create a map object, and include the MapTypeId to add
     // to the map type control.
@@ -366,6 +369,8 @@ function initMap() {
 		});
 		
 		markers.push(marker);
+		
+		
 
 		// Create an onclick event to open the large infowindow at each marker.		
 		marker.addListener('click', function(){
@@ -382,10 +387,17 @@ function initMap() {
 		marker.addListener('mouseout', function() {
             this.setIcon(defaultIcon);
 			//this.setAnimation(null);
-        });
-		
-		
+        });		
 	}
+	
+	var geocoder = new google.maps.Geocoder();
+
+	document.getElementById('places').addEventListener('click', function() {
+		cleatMarkers();
+		geocodeAddress(geocoder, map);
+	});
+	
+	
 	
 	
 	/*// Add markers to the array and initialize them on the map with animation
@@ -398,7 +410,7 @@ function initMap() {
     	
 	
 		
-	mapResultToMarker(markers);
+	mapResultToMarker(markers, markerInfoWindow);
 	
 	
 	// 3 seconds after the center of the map has changed, pan back to the marker.
@@ -444,7 +456,7 @@ function closeNav() {
  
 
  
-
+//animate markers with drop effect
 function drop() {
 	if (markers.length != 0){
 		for (var i = 0; i < markers.length; i++) {
@@ -474,7 +486,7 @@ function addListing(places) {
 }
 
 
-function mapResultToMarker(markers){	
+function mapResultToMarker(markers,markerInfoWindow){	
 	//add listener to results item to indicate matching marker on map when hover 
 	var sideListing = document.getElementsByClassName('links');
 	for(i = 0;  i < sideListing.length; i++){
@@ -486,26 +498,21 @@ function mapResultToMarker(markers){
 				//console.log(markers[i].title);
 				markers[i].setAnimation(google.maps.Animation.BOUNCE);
 			};
-		}(i));	
-		
+		}(i));			
 		
 		sideListing[i].onmouseout = (function (i) {
 			return function () {
-				this.style.background = 'green';
-				//console.log(i);				
-				//console.log(markers[i].title);
+				this.style.background = 'green';				
 				markers[i].setAnimation(null);
 			};
 		}(i));	
 
 		sideListing[i].onclick = (function (i) {
-			return function () {
-				this.style.background = 'green';
-				//console.log(i);				
-				//alert(markers[i].title);
+			return function () {			
 				markers[i].setAnimation(google.maps.Animation.DROP);
 				map.setZoom(16);
-				map.setCenter(markers[i].getPosition());
+				map.setCenter(markers[i].getPosition());				
+				showInfoWindow (markers[i], markerInfoWindow);
 			};
 		}(i));		
 	}
@@ -527,9 +534,7 @@ function makeMarkerIcon(markerColor) {
 }
 
 
-
-function zoomIn () {
-	
+function zoomIn () {	
 	//console.log(i);				
 	//alert(markers[i].title);
 	markers[i].setAnimation(null);
@@ -538,8 +543,7 @@ function zoomIn () {
 };
 
 
-function showInfoWindow (marker, markerInfoWindow) {
-	
+function showInfoWindow (marker, markerInfoWindow) {	
 	// Check to make sure the infowindow is not already opened on this marker.
 	if (markerInfoWindow.marker != marker) {
 		// Clear the infowindow content to give the streetview time to load.
@@ -583,8 +587,8 @@ function showInfoWindow (marker, markerInfoWindow) {
         // given radius is 50 meters or less.
 		
 		// Use streetview service to get the closest streetview image within
-			// 50 meters of the markers position
-			streetViewService.getPanoramaByLocation(marker.position, radius, processSVData);
+		// 50 meters of the markers position
+		streetViewService.getPanoramaByLocation(marker.position, radius, processSVData);
 		
 		//markerInfoWindow.setContent(marker.title);
 		// Open the infowindow on the correct marker.
@@ -593,4 +597,33 @@ function showInfoWindow (marker, markerInfoWindow) {
 }
 
 
+function cleatMarkers () {
+	for (var i = 0; i < markers.length; i++) {
+		markers[i].setMap(null);
+	}
+}
+
+
+
+
+function geocodeAddress(geocoder, resultsMap) {
+	var markerInfoWindow = new google.maps.InfoWindow();
+	var address = document.getElementById('places-search').value;
+	geocoder.geocode({'address': address}, function(results, status) {
+	if (status === 'OK') {
+		resultsMap.setCenter(results[0].geometry.location);
+		var marker = new google.maps.Marker({
+			map: resultsMap,
+			position: results[0].geometry.location
+		});
+		
+		marker.setAnimation(google.maps.Animation.DROP);
+		marker.addListener('click', function(){
+			showInfoWindow(this, markerInfoWindow);
+		});	
+	} else {
+		alert('Geocode was not successful for the following reason: ' + status);
+		}
+	});
+ }
 //google.maps.event.addDomListener(window, 'load', drop);

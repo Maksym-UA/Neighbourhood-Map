@@ -10,9 +10,6 @@ var map;
 var markers = [];
 
 
-var geocoder;
-
-
 function initMap() {		
 	// Create a new StyledMapType object, passing it an array of styles,
         // and the name to be displayed on the map type control.
@@ -335,7 +332,13 @@ function initMap() {
 	
 	var markerInfoWindow = new google.maps.InfoWindow();
 	
-	geocoder = new google.maps.Geocoder();
+	var input = document.getElementById('places-search');
+	var searchBox = new google.maps.places.SearchBox(input);
+	
+	
+	//var autocomplete = new google.maps.places.Autocomplete(input);
+	
+	var geocoder = new google.maps.Geocoder();
 	
 	
 	// Create a map object, and include the MapTypeId to add
@@ -355,6 +358,9 @@ function initMap() {
 	map.mapTypes.set('styled_map', styledMapType);
 	map.setMapTypeId('styled_map');
 	
+	
+	
+	
 	// Add markers to the array and initialize them on the map
 	for (var i =0; i < myPlaces.length; i++){
 		var position = myPlaces[i].location;
@@ -368,20 +374,16 @@ function initMap() {
 			id: i
 		});
 		
-		markers.push(marker);
-		
-		
+		markers.push(marker);		
 
 		// Create an onclick event to open the large infowindow at each marker.		
 		marker.addListener('click', function(){
 			showInfoWindow(this, markerInfoWindow);
-		});	
-		
+		});			
 	
 		marker.addListener('mouseover', function() {
             this.setIcon(highlightedIcon);
-			//this.setAnimation(google.maps.Animation.BOUNCE);
-			
+			//this.setAnimation(google.maps.Animation.BOUNCE);			
         });
 		
 		marker.addListener('mouseout', function() {
@@ -390,35 +392,33 @@ function initMap() {
         });		
 	}
 	
-	var geocoder = new google.maps.Geocoder();
-
-	document.getElementById('places').addEventListener('click', function() {
-		cleatMarkers();
-		geocodeAddress(geocoder, map);
-	});
 	
-	
-	
-	
-	/*// Add markers to the array and initialize them on the map with animation
-	for (var i = 0; i < myPlaces.length; i++){		
-		addMarkerWithTimeout(myPlaces[i], i * 300);		
-	}*/
-	
+	document.getElementById('places-search').addEventListener('focus',function(){
+			markers.forEach(function(marker) {
+			  
+			  marker.setMap(null);
+            //marker.setAnimation(google.maps.Animation.BOUNCE);
 			
-	addListing(myPlaces);
-    	
-	
+			
+          });
+		}, 300);			
 		
+	
+	
+	
+	addListing(myPlaces);    	
+	
+	
 	mapResultToMarker(markers, markerInfoWindow);
 	
+	initAutocomplete(input, searchBox, markerInfoWindow);
 	
 	// 3 seconds after the center of the map has changed, pan back to the marker.
-	/*map.addListener('center_changed', function() {
+/* 	map.addListener('center_changed', function() {
         window.setTimeout(function() {
             map.panTo(markers[0].getPosition());
         }, 3000);
-    });*/
+    }); */
 
         /* marker.addListener('click', function() {
           map.setZoom(8);
@@ -597,33 +597,93 @@ function showInfoWindow (marker, markerInfoWindow) {
 }
 
 
-function cleatMarkers () {
-	for (var i = 0; i < markers.length; i++) {
-		markers[i].setMap(null);
-	}
-}
-
-
-
-
-function geocodeAddress(geocoder, resultsMap) {
-	var markerInfoWindow = new google.maps.InfoWindow();
-	var address = document.getElementById('places-search').value;
-	geocoder.geocode({'address': address}, function(results, status) {
-	if (status === 'OK') {
-		resultsMap.setCenter(results[0].geometry.location);
-		var marker = new google.maps.Marker({
-			map: resultsMap,
-			position: results[0].geometry.location
-		});
+ function initAutocomplete(input, searchBox, markerInfoWindow) {
+	 
+		// Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function() {
+			searchBox.setBounds(map.getBounds());
+        });		
 		
-		marker.setAnimation(google.maps.Animation.DROP);
-		marker.addListener('click', function(){
-			showInfoWindow(this, markerInfoWindow);
-		});	
-	} else {
-		alert('Geocode was not successful for the following reason: ' + status);
-		}
-	});
- }
+		
+		
+        var defaultIcon = makeMarkerIcon('ff1a1a');
+        var highlightedIcon = makeMarkerIcon('1aa3ff');
+        //map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function() {
+          searchBox.setBounds(map.getBounds());
+        });
+
+        var searchResults = [];
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener('places_changed', function() {
+          var places = searchBox.getPlaces();
+
+          if (places.length == 0) {
+            return;
+          }
+
+          // Clear out the old markers.
+          searchResults.forEach(function(marker) {
+            marker.setMap(null);
+			
+          });
+          searchResults = [];
+
+          // For each place, get the icon, name and location.
+          var bounds = new google.maps.LatLngBounds();
+          places.forEach(function(place) {
+            if (!place.geometry) {
+              console.log("Returned place contains no geometry");
+              return;
+            }
+           /*  var icon = {
+              url: place.icon,
+              size: new google.maps.Size(71, 71),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(17, 34),
+              scaledSize: new google.maps.Size(25, 25)
+            }; */
+
+            // Create a marker for each place.
+            var marker = new google.maps.Marker({
+              map: map,
+              icon: defaultIcon,
+              title: place.name,
+              position: place.geometry.location,
+			  animation: google.maps.Animation.DROP
+            });
+			
+			searchResults.push(marker);		
+
+			// Create an onclick event to open the large infowindow at each marker.		
+			marker.addListener('click', function(){
+				showInfoWindow(this, markerInfoWindow);
+			});		
+			
+			marker.addListener('mouseover', function() {
+            this.setIcon(highlightedIcon);
+			//this.setAnimation(google.maps.Animation.BOUNCE);			
+        });
+		
+		marker.addListener('mouseout', function() {
+            this.setIcon(defaultIcon);
+			//this.setAnimation(null);
+        });		
+
+            if (place.geometry.viewport) {
+              // Only geocodes have viewport.
+              bounds.union(place.geometry.viewport);
+            } else {
+              bounds.extend(place.geometry.location);
+            }
+          });
+          map.fitBounds(bounds);
+        });
+      }
+
+ 
+ 
 //google.maps.event.addDomListener(window, 'load', drop);

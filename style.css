@@ -122,7 +122,7 @@ header {
 }
 
 
-#places {
+#filter {
 	box-sizing: border-box;
     border: 2px solid #1aa3ff;
     border-radius: 4px;
@@ -133,6 +133,7 @@ header {
     background: -moz-linear-gradient( ##007acc, #1aa3ff); /* For Firefox 3.6 to 15 */
     background: linear-gradient( #007acc, #1aa3ff); /* Standard syntax (must be last) */
 	color: #f1f1f1;
+	width: 100%;
 }
 
 

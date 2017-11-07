@@ -358,9 +358,7 @@ function initMap() {
 	map.mapTypes.set('styled_map', styledMapType);
 	map.setMapTypeId('styled_map');
 	
-	
-	
-	
+		
 	// Add markers to the array and initialize them on the map
 	for (var i =0; i < myPlaces.length; i++){
 		var position = myPlaces[i].location;
@@ -392,24 +390,28 @@ function initMap() {
         });		
 	}
 	
+	document.getElementById('favourites').addEventListener('click',function(){
+		toggleFavourites();	
+		addListing(markers);
+		mapResultToMarker(markers, markerInfoWindow);
+	});	
 	
-	document.getElementById('places-search').addEventListener('focus',function(){
-			markers.forEach(function(marker) {
-			  
-			  marker.setMap(null);
-            //marker.setAnimation(google.maps.Animation.BOUNCE);
-			
-			
-          });
-		}, 300);			
+	
+	document.getElementsByClassName('closebtn')[0].addEventListener('click', closeNav);	
+	
+	//document.getElementById('places-search').addEventListener('focus', hideWhenSearch);			
+	
+	
+	document.getElementById('places-search').addEventListener('focusout',function(){
 		
 	
+	});	
 	
 	
-	addListing(myPlaces);    	
+	//addListing();    	
 	
 	
-	mapResultToMarker(markers, markerInfoWindow);
+	
 	
 	initAutocomplete(input, searchBox, markerInfoWindow);
 	
@@ -456,12 +458,30 @@ function closeNav() {
  
 
  
+function hideWhenSearch (){
+	var focused = document.getElementById('places-search');		
+	//if (focused=== document.activeElement){
+	markers.forEach(function(marker) {	
+		if(marker.map != map ) {
+				return;
+		} else {
+				marker.setMap(null);
+				//marker.setAnimation(google.maps.Animation.BOUNCE);				
+		}				
+    });			 
+}
+ 
+ 
 //animate markers with drop effect
-function drop() {
+function toggleFavourites() {	
 	if (markers.length != 0){
 		for (var i = 0; i < markers.length; i++) {
-			markers[i].setMap(map);		
-		}		
+			if (markers[i].map != map){
+				markers[i].setMap(map);					
+			} else{
+				markers[i].setMap(null);			
+			}	
+		}
 	} else {
 		alert('Oops, no places in favourites. Go add some...');
 	} 	
@@ -469,15 +489,17 @@ function drop() {
  
  
 //populate results div in search pane
-function addListing(places) {
+function addListing(markers) {	
 	var searchResults = document.getElementById('results');	
+	//clear old listings
+	searchResults.innerHTML = '';
 	
-	for (var i = 0; i < places.length; i++){		
+	for (var i = 0; i < markers.length; i++){		
 		var elem = document.createElement('li');
 		var item = document.createElement('h5');
 		item.classList.add("links");
 		// Set its contents:
-        item.appendChild(document.createTextNode(places[i].title));
+        item.appendChild(document.createTextNode(markers[i].title));
 		//add it to h5
 		elem.appendChild(item);
         // Add it to the list:
@@ -490,31 +512,36 @@ function mapResultToMarker(markers,markerInfoWindow){
 	//add listener to results item to indicate matching marker on map when hover 
 	var sideListing = document.getElementsByClassName('links');
 	for(i = 0;  i < sideListing.length; i++){
-		//alert(sideListing[i].innerHTML);		
-		sideListing[i].onmouseover = (function (i) {
-			return function () {
-				this.style.background = 'red';
-				//console.log(i);
-				//console.log(markers[i].title);
-				markers[i].setAnimation(google.maps.Animation.BOUNCE);
-			};
-		}(i));			
-		
-		sideListing[i].onmouseout = (function (i) {
-			return function () {
-				this.style.background = 'green';				
-				markers[i].setAnimation(null);
-			};
-		}(i));	
+		if (sideListing[i].innerHTML === markers[i].title){		
+			//alert(sideListing[i].innerHTML);		
+			sideListing[i].onmouseover = (function (i) {
+				return function () {
+					this.style.background = 'red';
+					//console.log(i);
+					//console.log(markers[i].title);
+					markers[i].setAnimation(google.maps.Animation.BOUNCE);
+				};
+			}(i));			
+			
+			sideListing[i].onmouseout = (function (i) {
+				return function () {
+					this.style.background = 'green';				
+					markers[i].setAnimation(null);
+				};
+			}(i));	
 
-		sideListing[i].onclick = (function (i) {
-			return function () {			
-				markers[i].setAnimation(google.maps.Animation.DROP);
-				map.setZoom(16);
-				map.setCenter(markers[i].getPosition());				
-				showInfoWindow (markers[i], markerInfoWindow);
-			};
-		}(i));		
+			sideListing[i].onclick = (function (i) {
+				return function () {					
+					markers[i].setMap(map);
+					markers[i].setAnimation(google.maps.Animation.DROP);
+					map.setZoom(14);
+					map.setCenter(markers[i].getPosition());				
+					showInfoWindow (markers[i], markerInfoWindow);					
+				};
+			}(i));	
+		} else {
+			alert("Sorry, can't find location on the map.");
+		}
 	}
 }
 
@@ -570,7 +597,7 @@ function showInfoWindow (marker, markerInfoWindow) {
 						position: streetViewLocation,
 						pov: {
 							heading: viewHeading,
-							pitch: 30
+							pitch: 25
 						},
 						motionTrackingControlOptions: {
 							position: google.maps.ControlPosition.LEFT_BOTTOM
@@ -598,64 +625,67 @@ function showInfoWindow (marker, markerInfoWindow) {
 
 
  function initAutocomplete(input, searchBox, markerInfoWindow) {
-	 
-		// Bias the SearchBox results towards current map's viewport.
-        map.addListener('bounds_changed', function() {
-			searchBox.setBounds(map.getBounds());
-        });		
+	
+	var searchResults = document.getElementById('results');	
+	//clear old listings
+	searchResults.innerHTML = '';
+	
+	var defaultIcon = makeMarkerIcon('ff1a1a');
+	var highlightedIcon = makeMarkerIcon('1aa3ff');
+	//map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+	
+	
+	// Bias the SearchBox results towards current map's viewport.
+	map.addListener('bounds_changed', function() {
+		searchBox.setBounds(map.getBounds());
+	});		
+	
+	// Bias the SearchBox results towards current map's viewport.
+	map.addListener('bounds_changed', function() {
+		searchBox.setBounds(map.getBounds());
+	});
+
+	var searchResults = [];
+	// Listen for the event fired when the user selects a prediction and retrieve
+	// more details for that place.
+	searchBox.addListener('places_changed', function() {
+		var places = searchBox.getPlaces();
+
+		if (places.length == 0) {
+			return;
+		}
+
+		// Clear out the old markers.
+		searchResults.forEach(function(marker) {
+			marker.setMap(null);			
+		});
 		
+		searchResults = [];
+
+		// For each place, get the icon, name and location.
+		var bounds = new google.maps.LatLngBounds();
+		places.forEach(function(place) {
+			if (!place.geometry) {
+				console.log("Returned place contains no geometry");
+				return;
+			}
+		   /*  var icon = {
+			  url: place.icon,
+			  size: new google.maps.Size(71, 71),
+			  origin: new google.maps.Point(0, 0),
+			  anchor: new google.maps.Point(17, 34),
+			  scaledSize: new google.maps.Size(25, 25)
+			}; */
+
+			// Create a marker for each place.
+			var marker = new google.maps.Marker({
+				map: map,
+				icon: defaultIcon,
+				title: place.name,
+				position: place.geometry.location,
+				animation: google.maps.Animation.DROP
+			});
 		
-		
-        var defaultIcon = makeMarkerIcon('ff1a1a');
-        var highlightedIcon = makeMarkerIcon('1aa3ff');
-        //map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
-        // Bias the SearchBox results towards current map's viewport.
-        map.addListener('bounds_changed', function() {
-          searchBox.setBounds(map.getBounds());
-        });
-
-        var searchResults = [];
-        // Listen for the event fired when the user selects a prediction and retrieve
-        // more details for that place.
-        searchBox.addListener('places_changed', function() {
-          var places = searchBox.getPlaces();
-
-          if (places.length == 0) {
-            return;
-          }
-
-          // Clear out the old markers.
-          searchResults.forEach(function(marker) {
-            marker.setMap(null);
-			
-          });
-          searchResults = [];
-
-          // For each place, get the icon, name and location.
-          var bounds = new google.maps.LatLngBounds();
-          places.forEach(function(place) {
-            if (!place.geometry) {
-              console.log("Returned place contains no geometry");
-              return;
-            }
-           /*  var icon = {
-              url: place.icon,
-              size: new google.maps.Size(71, 71),
-              origin: new google.maps.Point(0, 0),
-              anchor: new google.maps.Point(17, 34),
-              scaledSize: new google.maps.Size(25, 25)
-            }; */
-
-            // Create a marker for each place.
-            var marker = new google.maps.Marker({
-              map: map,
-              icon: defaultIcon,
-              title: place.name,
-              position: place.geometry.location,
-			  animation: google.maps.Animation.DROP
-            });
-			
 			searchResults.push(marker);		
 
 			// Create an onclick event to open the large infowindow at each marker.		
@@ -664,25 +694,30 @@ function showInfoWindow (marker, markerInfoWindow) {
 			});		
 			
 			marker.addListener('mouseover', function() {
-            this.setIcon(highlightedIcon);
-			//this.setAnimation(google.maps.Animation.BOUNCE);			
-        });
+				this.setIcon(highlightedIcon);
+				//this.setAnimation(google.maps.Animation.BOUNCE);			
+			});
 		
-		marker.addListener('mouseout', function() {
-            this.setIcon(defaultIcon);
-			//this.setAnimation(null);
-        });		
+			marker.addListener('mouseout', function() {
+				this.setIcon(defaultIcon);
+				//this.setAnimation(null);
+			});		
 
-            if (place.geometry.viewport) {
-              // Only geocodes have viewport.
-              bounds.union(place.geometry.viewport);
-            } else {
-              bounds.extend(place.geometry.location);
-            }
-          });
-          map.fitBounds(bounds);
-        });
-      }
+			if (place.geometry.viewport) {
+				// Only geocodes have viewport.
+				bounds.union(place.geometry.viewport);
+			} else {
+				bounds.extend(place.geometry.location);
+			}
+		});
+		map.fitBounds(bounds);
+		console.log(searchResults);
+		addListing(searchResults);
+		mapResultToMarker(searchResults, markerInfoWindow);
+	
+	});
+	
+}
 
  
  

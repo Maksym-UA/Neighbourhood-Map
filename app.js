@@ -335,10 +335,8 @@ function initMap() {
 	var input = document.getElementById('places-search');
 	var searchBox = new google.maps.places.SearchBox(input);
 	
-	
-	//var autocomplete = new google.maps.places.Autocomplete(input);
-	
-	var geocoder = new google.maps.Geocoder();
+		
+
 	
 	
 	// Create a map object, and include the MapTypeId to add
@@ -390,27 +388,47 @@ function initMap() {
         });		
 	}
 	
+	var count = 0;
+	
 	document.getElementById('favourites').addEventListener('click',function(){
-		toggleFavourites();	
-		addListing(markers);
+		count++;
+		//alert(count);
+		toggleFavourites();			
 		mapResultToMarker(markers, markerInfoWindow);
 	});	
 	
-	
+	//close side panel
 	document.getElementsByClassName('closebtn')[0].addEventListener('click', closeNav);	
 	
-	//document.getElementById('places-search').addEventListener('focus', hideWhenSearch);			
 	
+	//hide markers when start searching
+	document.getElementById('places-search').addEventListener('focus', function(){	
+		var selector = count % 2;	
+		hideWhenSearch (selector); 
+	});	
 	
+	//show markers if present on the map before when don't focus on the search bar
 	document.getElementById('places-search').addEventListener('focusout',function(){
-		
-	
+		var selector = count % 2;	
+		showWhenSearch(selector);		
 	});	
 	
 	
-	//addListing();    	
+	//show or hide filter menu
+	document.getElementById('filter').addEventListener('click', toggleFilter);	
 	
 	
+	
+	
+	/* for (var i = 0; i < radioButtons.length; i++) {
+		radioButtons[i].addEventListener('click', function(){
+			console.log(this.id);			
+		});
+	}; */
+	
+	
+	
+
 	
 	
 	initAutocomplete(input, searchBox, markerInfoWindow);
@@ -430,6 +448,13 @@ function initMap() {
 
 
 //-----------functions--------//
+
+
+function toggleFilter() {
+    document.getElementById("myDropdown").classList.toggle("show");
+}
+
+
 
 //function to open side search bar with future search results
 function openNav() {
@@ -458,30 +483,42 @@ function closeNav() {
  
 
  
-function hideWhenSearch (){
-	var focused = document.getElementById('places-search');		
-	//if (focused=== document.activeElement){
+function hideWhenSearch (selector){
 	markers.forEach(function(marker) {	
-		if(marker.map != map ) {
-				return;
-		} else {
-				marker.setMap(null);
-				//marker.setAnimation(google.maps.Animation.BOUNCE);				
-		}				
+		if (selector ===  1){
+			marker.setMap(null);
+		} 
     });			 
 }
- 
- 
+
+
+function showWhenSearch(selector){
+		
+	markers.forEach(function(marker) {	
+		if (selector ===  1){
+			marker.setMap(map);
+		} 
+    });			 
+}
+
 //animate markers with drop effect
 function toggleFavourites() {	
+	var searchResults = document.getElementById('results');	
+	//clear old listings	
+	
 	if (markers.length != 0){
-		for (var i = 0; i < markers.length; i++) {
-			if (markers[i].map != map){
-				markers[i].setMap(map);					
-			} else{
-				markers[i].setMap(null);			
-			}	
-		}
+		markers.forEach(function(marker) {	
+			if (marker.map != map ) {
+					marker.setMap(map);		
+					addListing(markers);
+			} else {
+				marker.setMap(null);
+				searchResults.innerHTML = '';
+			}				
+		});			 
+		
+		
+		
 	} else {
 		alert('Oops, no places in favourites. Go add some...');
 	} 	
@@ -640,21 +677,19 @@ function showInfoWindow (marker, markerInfoWindow) {
 		searchBox.setBounds(map.getBounds());
 	});		
 	
-	// Bias the SearchBox results towards current map's viewport.
-	map.addListener('bounds_changed', function() {
-		searchBox.setBounds(map.getBounds());
-	});
-
+	
 	var searchResults = [];
 	// Listen for the event fired when the user selects a prediction and retrieve
 	// more details for that place.
 	searchBox.addListener('places_changed', function() {
 		var places = searchBox.getPlaces();
-
+		
 		if (places.length == 0) {
+			window.alert("No places matching the query found");
 			return;
-		}
-
+		}	
+		
+		
 		// Clear out the old markers.
 		searchResults.forEach(function(marker) {
 			marker.setMap(null);			
@@ -665,60 +700,107 @@ function showInfoWindow (marker, markerInfoWindow) {
 		// For each place, get the icon, name and location.
 		var bounds = new google.maps.LatLngBounds();
 		places.forEach(function(place) {
-			if (!place.geometry) {
-				console.log("Returned place contains no geometry");
-				return;
-			}
-		   /*  var icon = {
-			  url: place.icon,
-			  size: new google.maps.Size(71, 71),
-			  origin: new google.maps.Point(0, 0),
-			  anchor: new google.maps.Point(17, 34),
-			  scaledSize: new google.maps.Size(25, 25)
-			}; */
-
-			// Create a marker for each place.
-			var marker = new google.maps.Marker({
-				map: map,
-				icon: defaultIcon,
-				title: place.name,
-				position: place.geometry.location,
-				animation: google.maps.Animation.DROP
-			});
-		
-			searchResults.push(marker);		
-
-			// Create an onclick event to open the large infowindow at each marker.		
-			marker.addListener('click', function(){
-				showInfoWindow(this, markerInfoWindow);
-			});		
+			//check what place object returns
+			//console.log(place.opening_hours.open_now);
+			/* for (var k = 0; k < place.types.length; k++){
+				console.log(place.types[k]);
+			};	 */
+			//console.log(place);
+			var type = 	setupClickListener();
+			var openNow = isOpen();
+			console.log(openNow);
 			
-			marker.addListener('mouseover', function() {
-				this.setIcon(highlightedIcon);
-				//this.setAnimation(google.maps.Animation.BOUNCE);			
-			});
-		
-			marker.addListener('mouseout', function() {
-				this.setIcon(defaultIcon);
-				//this.setAnimation(null);
-			});		
+			console.log(type);
+			
+			
+			console.log(place.types);
+			for (var k = 0; k < place.types.length; k++){
+				if ( type === place.types[k] && openNow === place.opening_hours.open_now ) {
+				console.log('found match');			
+			
+					if (!place.geometry) {
+						console.log("Returned place contains no geometry");
+						return;
+					}
+				   /*  var icon = {
+					  url: place.icon,
+					  size: new google.maps.Size(71, 71),
+					  origin: new google.maps.Point(0, 0),
+					  anchor: new google.maps.Point(17, 34),
+					  scaledSize: new google.maps.Size(25, 25)
+					}; */
 
-			if (place.geometry.viewport) {
-				// Only geocodes have viewport.
-				bounds.union(place.geometry.viewport);
-			} else {
-				bounds.extend(place.geometry.location);
+					// Create a marker for each place.
+					var marker = new google.maps.Marker({
+						map: map,
+						icon: defaultIcon,
+						title: place.name,
+						position: place.geometry.location,
+						animation: google.maps.Animation.DROP
+					});
+			
+					searchResults.push(marker);		
+
+					// Create an onclick event to open the large infowindow at each marker.		
+					marker.addListener('click', function(){
+						showInfoWindow(this, markerInfoWindow);
+					});		
+					
+					marker.addListener('mouseover', function() {
+						this.setIcon(highlightedIcon);
+						//this.setAnimation(google.maps.Animation.BOUNCE);			
+					});
+				
+					marker.addListener('mouseout', function() {
+						this.setIcon(defaultIcon);
+						//this.setAnimation(null);
+					});		
+
+					if (place.geometry.viewport) {
+						// Only geocodes have viewport.
+						bounds.union(place.geometry.viewport);
+					} else {
+						bounds.extend(place.geometry.location);
+					}
+			
+				}
 			}
+			
+			
 		});
 		map.fitBounds(bounds);
-		console.log(searchResults);
+		
 		addListing(searchResults);
-		mapResultToMarker(searchResults, markerInfoWindow);
-	
-	});
-	
+		mapResultToMarker(searchResults, markerInfoWindow);	
+		
+		
+		
+		
+		
+	});	
 }
 
+// Sets a listener on a radio button to change the filter type on Places
+// Autocomplete.
+function setupClickListener() {
+	var radioButtons = document.getElementsByClassName('selectors');
+	for (var i = 0; i < radioButtons.length; i++) {
+		if (radioButtons[i].checked) {
+		  rate_value = radioButtons[i].value;
+		  return rate_value;
+		}
+		
+	};
+}
+ 
+ function isOpen() {
+	var checkButton = document.getElementById('open_now');
+    if (checkButton.checked) {
+		return true;
+    } else {
+		return false;
+	}
+ }
  
  
 //google.maps.event.addDomListener(window, 'load', drop);

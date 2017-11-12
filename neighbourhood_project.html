@@ -32,36 +32,11 @@
 			<div id="mySidenav" class="sidenav">
 				<a href="javascript:void(0)" class="closebtn">&times;</a>
 				 <div id="search">
-					<input id="places-search" type="text" name="search" placeholder="Search...">					
+					<input id="places-search" type="text" name="search" placeholder="Search online...">					
 					
-					<div class="dropdown">
-						<button id="filter">Choose Filter</button>
-							<ul id="myDropdown" class="dropdown-content">
-								<!-- <li>
-									<input type="radio" name="type" class="selectors" checked="checked" value="all">
-									<label for="all">All</label>
-								</li> -->
-								<li>
-									<input type="radio" class="selectors" name="type" value="bank" checked="checked">
-									<label for="changetype-bank">Bank</label>
-								</li>
-								<li>	
-									<input type="radio" class="selectors" name="type" value="food">
-									<label for="food">Food</label>
-								</li>
-								<li>	
-									<input type="radio" class="selectors" name="type" value="museum">
-									<label for="museum">Museum</label>
-								</li>
-								<li>	
-									<input type="radio" class="selectors" name="type" value="store">
-									<label for="store">Store</label>
-								</li>
-								<li>	
-									<input type="checkbox" id="open_now" value="">
-									<label for="open_now">Open now</label>
-								</li>
-						  </ul>
+					<div id="filter">
+						<input class="col-xs-9 col-sm-10 col-md-10 places-filter" type="text" name="filter" >
+						<button class="col-xs-3 col-sm-2 col-md-2 filterIcon">Filter</button>							
 					</div>
 					
 				</div>
@@ -71,6 +46,7 @@
 					<ul id="results">
 						
 					</ul>
+					<!-- <button id="more">More</button> -->
 				</div>
 			</div>
 

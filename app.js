@@ -366,11 +366,16 @@ function initMap() {
 			id: i
 		});
 		
-		markers.push(marker);		
-
+		markers.push(marker);
+		
+		
+		
 		// Create an onclick event to open the large infowindow at each marker.		
 		marker.addListener('click', function(){
+			
 			showInfoWindow(this, markerInfoWindow);
+			searcWithFoursquare(this);
+			
 		});			
 	
 		marker.addListener('mouseover', function() {
@@ -389,15 +394,15 @@ function initMap() {
 	document.getElementById('favourites').addEventListener('click',function(){
 		count++;
 		//alert(count);
-		toggleFavourites();			
-		mapResultToMarker(markers, markerInfoWindow);
+		toggleFavourites();	
+		bindListWithMarkers(markers, markerInfoWindow);
 	});	
 	
 	//close side panel
 	document.getElementsByClassName('closebtn')[0].addEventListener('click', closeNav);	
 	
 	
-	//hide markers when start searching
+/* 	//hide markers when start searching
 	document.getElementById('places-search').addEventListener('focus', function(){	
 		var selector = count % 2;	
 		hideWhenSearch (selector); 
@@ -407,19 +412,8 @@ function initMap() {
 	document.getElementById('places-search').addEventListener('focusout',function(){
 		var selector = count % 2;	
 		showWhenSearch(selector);		
-	});	
+	});	 */
 	
-	
-	//show or hide filter menu
-	document.getElementById('filter').addEventListener('click', toggleFilter);	
-	
-	
-	
-	/* for (var i = 0; i < radioButtons.length; i++) {
-		radioButtons[i].addEventListener('click', function(){
-			console.log(this.id);			
-		});
-	}; */
 	
 	
 	initAutocomplete(input, markerInfoWindow);
@@ -440,25 +434,31 @@ function initMap() {
 
 //-----------functions--------//
 
-function toggleFilter() {
-    document.getElementById("myDropdown").classList.toggle("show");
-}
-
 //function to open side search bar with future search results
-function openNav() {
+function openNav() {	
+	
 	//get current width of the map element
 	var width = document.getElementsByClassName("map")[0].offsetWidth;
+	var newWidth;
+	if (width < 600) {
+		newWidth = 250;
+	} else {
+		newWidth = 350;		
+	}
 	//add width to side bar i.e. make it appear on the screen
-	document.getElementById("mySidenav").style.width = "300px";
+	document.getElementById("mySidenav").style.width = newWidth+"px";
 	//console.log(width);
 	
 	//move the map to the left for 'push' effect
-	document.getElementsByClassName("map")[0].style.marginLeft = "300px";
-	width -=300;
+	document.getElementsByClassName("map")[0].style.marginLeft = newWidth+"px";
+	
 	
 	//adjust the map width so it fits in the screen without horizontal scroll bar
+	width -=newWidth;
 	document.getElementsByClassName("map")[0].style.width = width +"px"; 
 	console.log(width);	
+	
+	
 }
 
 //function to close side search bar with future search results
@@ -470,20 +470,16 @@ function closeNav() {
 }
  
  
-function hideWhenSearch (selector){
+function hideWhenSearch (){
 	markers.forEach(function(marker) {	
-		if (selector ===  1){
-			marker.setMap(null);
-		} 
+		marker.setMap(null);		
     });			 
 }
 
 
-function showWhenSearch(selector){		
+function showWhenSearch(){		
 	markers.forEach(function(marker) {	
-		if (selector ===  1){
-			marker.setMap(map);
-		} 
+		marker.setMap(map);	
     });			 
 }
 
@@ -498,8 +494,7 @@ function toggleFavourites() {
 					marker.setMap(map);		
 					addListing(markers);
 			} else {
-				marker.setMap(null);
-				searchResults.innerHTML = '';
+				marker.setMap(null);				
 			}				
 		});		
 	} else {
@@ -528,7 +523,7 @@ function addListing(markers) {
 }
 
 
-function mapResultToMarker(markers,markerInfoWindow){	
+function bindListWithMarkers(markers,markerInfoWindow){	
 	//add listener to results item to indicate matching marker on map when hover 
 	var sideListing = document.getElementsByClassName('links');
 	for(i = 0;  i < sideListing.length; i++){
@@ -539,7 +534,7 @@ function mapResultToMarker(markers,markerInfoWindow){
 					this.style.background = 'red';
 					//console.log(i);
 					//console.log(markers[i].title);
-					markers[i].setAnimation(google.maps.Animation.BOUNCE);
+					markers[i].setAnimation(google.maps.Animation.BOUNCE);					
 				};
 			}(i));			
 			
@@ -555,8 +550,9 @@ function mapResultToMarker(markers,markerInfoWindow){
 					markers[i].setMap(map);
 					markers[i].setAnimation(google.maps.Animation.DROP);
 					map.setZoom(13);
-					map.setCenter(markers[i].getPosition());				
-					showInfoWindow (markers[i], markerInfoWindow);					
+					map.setCenter(markers[i].getPosition());						
+					showInfoWindow (markers[i], markerInfoWindow);	
+					searcWithFoursquare(markers[i]);
 				};
 			}(i));	
 		} else {
@@ -603,12 +599,15 @@ function showInfoWindow (marker, markerInfoWindow) {
 		var streetViewService = new google.maps.StreetViewService();
 		var radius = 50;
 		
+				
 		function processSVData(data, status) {
 			if (status === google.maps.StreetViewStatus.OK) {
 				var streetViewLocation = data.location.latLng;
 				
 				var viewHeading = google.maps.geometry.spherical.computeHeading(streetViewLocation, marker.position);
-				markerInfoWindow.setContent('<div>' + marker.title + '</div><div id="pano"></div>');
+				markerInfoWindow.setContent('<div id="name">' + marker.title + 
+				'</div><div id="pano"></div><div><ul id="placeInfo"></ul></div>' + 
+				'<div id"fousquare"><a href="https://developer.foursquare.com/">Powered by Foursquare API</a></div>');
 				
 				
 				var panorama = new google.maps.StreetViewPanorama(
@@ -645,17 +644,17 @@ function showInfoWindow (marker, markerInfoWindow) {
 		// .2 seconds after the center of the map has changed, pan back to the marker.
 		window.setTimeout(function() {
             map.panTo(marker.getPosition());
-        }, 200);
-		
+        }, 200);		
 	}
 }
 
 
  function initAutocomplete(input, markerInfoWindow) {
 	
-	var searchResults = document.getElementById('results');	
+	var searchListing = document.getElementById('results');		
+	
 	//clear old listings
-	searchResults.innerHTML = '';
+	searchListing.innerHTML = '';
 	
 	var defaultIcon = makeMarkerIcon('ff1a1a');
 	var highlightedIcon = makeMarkerIcon('1aa3ff');
@@ -673,6 +672,7 @@ function showInfoWindow (marker, markerInfoWindow) {
 	// Listen for the event fired when the user selects a prediction and retrieve
 	// more details for that place.
 	searchBox.addListener('places_changed', function() {
+		hideWhenSearch ();	
 		var places = searchBox.getPlaces();
 		
 		if (places.length == 0) {
@@ -685,8 +685,9 @@ function showInfoWindow (marker, markerInfoWindow) {
 			marker.setMap(null);			
 		});
 		
+		//delete previous search results after each previous search event
 		searchResults = [];
-
+		
 		// For each place, get the icon, name and location.
 		var bounds = new google.maps.LatLngBounds();
 		places.forEach(function(place) {
@@ -695,14 +696,7 @@ function showInfoWindow (marker, markerInfoWindow) {
 			/* for (var k = 0; k < place.types.length; k++){
 				console.log(place.types[k]);
 			};	 */
-			//console.log(place);
-			var type = 	setupClickListener();
-			var openNow = isOpen();
-			console.log(openNow);
 			
-			console.log(type);
-			
-			console.log(place.types);
 			
 			
 			if (!place.geometry) {
@@ -718,12 +712,20 @@ function showInfoWindow (marker, markerInfoWindow) {
 				position: place.geometry.location,
 				animation: google.maps.Animation.DROP
 			});
+			//console.log(marker.position.lat());
+			
+			
+			
+			
+			searchResults.push(marker);	
 	
-			searchResults.push(marker);		
 
 			// Create an onclick event to open the large infowindow at each marker.		
 			marker.addListener('click', function(){
 				showInfoWindow(this, markerInfoWindow);
+				searcWithFoursquare(this);
+				map.panTo(marker.getPosition());
+				
 			});		
 			
 			marker.addListener('mouseover', function() {
@@ -746,29 +748,84 @@ function showInfoWindow (marker, markerInfoWindow) {
 		map.fitBounds(bounds);
 		
 		addListing(searchResults);
-		mapResultToMarker(searchResults, markerInfoWindow);			
+		bindListWithMarkers(searchResults, markerInfoWindow);	
+		
 	});	
+} 
+
+
+function searcWithFoursquare(marker){
+	
+	//console.log(marker.position.lat());
+	var placeCoordinates = String(marker.position.lat()) + ',' + String(marker.position.lng());
+	
+	//var placeCoordinates = String(marker.position).slice(1, -1).replace(" ", "");
+	//console.log(placeCoordinates);
+	
+	var query = String(marker.title);
+	
+	var clientID = 'PPCTPSMS0TH5GLA3QSAK0YYH4N0VDQKRDIT0VLKITFHRD2OC';
+	
+	var clientSecret = 'IUYZUMGIA0EJFDRYDGMYOGUYPRSFCDZFNZST5R0DE3RBFZYO';
+	
+	var foursquareUrl = 'https://api.foursquare.com/v2/venues/search?ll=' + placeCoordinates +
+	
+	'&query=' + query + '&radius=150&limit=1&' + 
+	'client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20170801';
+	//console.log(foursquareUrl);
+	
+	// no error handing method for jsonp so we need walkaround with timeout for the request
+	var fourSquareRequestTimeout = setTimeout(function(){
+		alert("Failed to get Foursquare resources");
+	}, 1000);
+	
+	$.ajax({
+		type: "GET",
+		dataType: "jsonp",
+		cache: false,
+		url: foursquareUrl,
+		success: function(data){
+			var result = data.response.venues[0];
+			console.log(result);
+			
+			//get place details	
+			var category = result.categories[0].name;
+			var address = result.location.address;
+			var contact = result.contact.phone;
+			var foursquareMemebersNow = result.hereNow.count;
+			var totalPeopleVisited = result.stats.usersCount;
+			
+			
+			var placeDetails = {
+				category: 'Category: ' + category,
+				address: 'Address: ' + address,
+				phone: 'Phone: ' + contact,
+				visitors: 'Foursquare members now: ' + foursquareMemebersNow,
+				totalVisitors: 'Total number of visitors: ' + totalPeopleVisited				
+			}
+			
+			var info = document.getElementById('placeInfo');	
+			//clear old listings
+			info.innerHTML = '';
+				
+			for (var property in placeDetails){	
+				if (placeDetails.hasOwnProperty(property)) {
+					var elem = document.createElement('li');
+					var item = document.createElement('h6');
+					// Set its contents:
+					item.append(document.createTextNode(placeDetails[property]));
+					//add it to h5
+					elem.appendChild(item);
+					// Add it to the list:
+					info.appendChild(elem);	
+				} else {
+					console.log('no data found');
+				}
+			}
+		
+			clearTimeout(fourSquareRequestTimeout);		
+		} 
+	});		
 }
 
-// Sets a listener on a radio button to change the filter type on Places
-// Autocomplete.
-function setupClickListener() {
-	var radioButtons = document.getElementsByClassName('selectors');
-	for (var i = 0; i < radioButtons.length; i++) {
-		if (radioButtons[i].checked) {
-		  rate_value = radioButtons[i].value;
-		  return rate_value;
-		}		
-	};
-}
- 
- function isOpen() {
-	var checkButton = document.getElementById('open_now');
-    if (checkButton.checked) {
-		return true;
-    } else {
-		return false;
-	}
- }
- 
 //google.maps.event.addDomListener(window, 'load', drop);

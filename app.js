@@ -362,8 +362,7 @@ function initMap() {
 			position: position,
 			title: title,
 			animation: google.maps.Animation.DROP,
-			icon: defaultIcon,
-			id: i
+			icon: defaultIcon			
 		});
 		
 		markers.push(marker);
@@ -635,16 +634,17 @@ function showInfoWindow (marker, markerInfoWindow) {
 		// 50 meters of the markers position
 		streetViewService.getPanoramaByLocation(marker.position, radius, processSVData);
 		
-		map.setZoom(14);
+		map.setZoom(13);
+		map.setCenter(marker.getPosition());
 		
 		//markerInfoWindow.setContent(marker.title);
 		// Open the infowindow on the correct marker.
 		markerInfoWindow.open(map, marker);
 		
-		// .2 seconds after the center of the map has changed, pan back to the marker.
+		/* // .2 seconds after the center of the map has changed, pan back to the marker.
 		window.setTimeout(function() {
             map.panTo(marker.getPosition());
-        }, 200);		
+        }, 200); */		
 	}
 }
 

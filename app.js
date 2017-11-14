@@ -362,7 +362,7 @@ function initMap() {
 			position: position,
 			title: title,
 			animation: google.maps.Animation.DROP,
-			icon: defaultIcon			
+			icon: defaultIcon
 		});
 		
 		markers.push(marker);
@@ -626,6 +626,10 @@ function showInfoWindow (marker, markerInfoWindow) {
 			}		
 		}
 		
+		
+		
+
+		
 		// Look for a nearby Street View panorama when the map is clicked.
         // getPanoramaByLocation will return the nearest pano when the
         // given radius is 50 meters or less.
@@ -634,8 +638,10 @@ function showInfoWindow (marker, markerInfoWindow) {
 		// 50 meters of the markers position
 		streetViewService.getPanoramaByLocation(marker.position, radius, processSVData);
 		
-		map.setZoom(13);
+		map.setZoom(14);
 		map.setCenter(marker.getPosition());
+		//move the map down so the infowindow is seen in full
+		map.panBy(0, -200);		
 		
 		//markerInfoWindow.setContent(marker.title);
 		// Open the infowindow on the correct marker.
@@ -715,19 +721,15 @@ function showInfoWindow (marker, markerInfoWindow) {
 			});
 			//console.log(marker.position.lat());
 			
-			
-			
-			
 			searchResults.push(marker);	
 	
-
 			// Create an onclick event to open the large infowindow at each marker.		
-			marker.addListener('click', function(){
+			google.maps.event.addListener(marker, 'click', function(){
 				showInfoWindow(this, markerInfoWindow);
-				searcWithFoursquare(this);
-				map.panTo(marker.getPosition());
-				
+				searcWithFoursquare(this);	
+						
 			});		
+			
 			
 			marker.addListener('mouseover', function() {
 				this.setIcon(highlightedIcon);
@@ -753,6 +755,8 @@ function showInfoWindow (marker, markerInfoWindow) {
 		
 	});	
 } 
+
+
 
 
 function searcWithFoursquare(marker){
@@ -834,7 +838,7 @@ function handleError(error){
 	//clear old listings
 	errorContainer.innerHTML = "";
 	
-	var item = document.createElement('h6');
+	var item = document.createElement('h5');
 	// Set its contents:
     item.appendChild(document.createTextNode(error));
 	// Add it to the error container:

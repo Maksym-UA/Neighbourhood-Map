@@ -497,7 +497,7 @@ function toggleFavourites() {
 			}				
 		});		
 	} else {
-		alert('Oops, no places in favourites. Go add some...');
+		handleError('Oops, no places in favourites. Go add some...');
 	} 	
 }
  
@@ -555,7 +555,7 @@ function bindListWithMarkers(markers,markerInfoWindow){
 				};
 			}(i));	
 		} else {
-			alert("Sorry, can't find location on the map.");
+			handleError("Sorry, can't find location on the map.");
 		}
 	}
 }
@@ -676,7 +676,7 @@ function showInfoWindow (marker, markerInfoWindow) {
 		var places = searchBox.getPlaces();
 		
 		if (places.length == 0) {
-			window.alert("No places matching the query found");
+			handleError("No places matching the query found");
 			return;
 		}	
 		
@@ -701,6 +701,7 @@ function showInfoWindow (marker, markerInfoWindow) {
 			
 			if (!place.geometry) {
 				console.log("Returned place contains no geometry");
+				handleError("Could not locate the place you search. Check your request.")
 				return;
 			}
 		   
@@ -776,7 +777,7 @@ function searcWithFoursquare(marker){
 	
 	// no error handing method for jsonp so we need walkaround with timeout for the request
 	var fourSquareRequestTimeout = setTimeout(function(){
-		alert("Failed to get Foursquare resources");
+		handleError("Failed to fetch Foursquare results");
 	}, 1000);
 	
 	$.ajax({
@@ -819,13 +820,36 @@ function searcWithFoursquare(marker){
 					// Add it to the list:
 					info.appendChild(elem);	
 				} else {
-					console.log('no data found');
+					handleError('No place data found.');
 				}
 			}
 		
 			clearTimeout(fourSquareRequestTimeout);		
 		} 
 	});		
+}
+
+function handleError(error){
+	var errorContainer = document.getElementById('error-message');	
+	//clear old listings
+	errorContainer.innerHTML = "";
+	
+	var item = document.createElement('h6');
+	// Set its contents:
+    item.appendChild(document.createTextNode(error));
+	// Add it to the error container:
+    errorContainer.appendChild(item);	
+	
+	var errorButton = document.createElement('button');
+	errorButton.appendChild(document.createTextNode("Close"));
+	errorButton.classList.add("closeError");
+	errorContainer.appendChild(errorButton);	
+	errorContainer.style.top = "100px"; 
+	
+	errorButton.addEventListener('click', function(){
+		errorContainer.style.top = "-100px"; 
+	});
+	
 }
 
 //google.maps.event.addDomListener(window, 'load', drop);

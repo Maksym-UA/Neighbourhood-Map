@@ -39,6 +39,10 @@ header {
 	margin-bottom: 20px;
 }
 
+#icon {
+	position: absolute;
+}
+
 
 .map {	
 	height: 100%;
@@ -207,7 +211,7 @@ header {
 #pano {
 	display: block;
 	width: 200px;
-	height: 250px;
+	height: 200px;
 	word-wrap: break-word;
 }
 
@@ -230,13 +234,45 @@ header {
 }
 
 
-#placeInfo li h5{
+#placeInfo li h6{
 	font-family: arial, sans-serif;
-	padding-left: 5px;
 	margin: 5px 0px;
+	font-weight: bold;
 }
 
 
 #error-message {
-	display: none;
+	position: absolute;
+	 left: 0;
+  right: 0;
+  margin: 0 auto;
+	top:-100px;
+	
+	z-index: 101;
+    width: 400px;
+	border: 1px solid #1aa3ff;
+    border-radius: 4px;
+	padding: 10px;
+	color: black;	
+	background: #ffffff; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient( #f2f2f2, #ffffff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient( #f2f2f2, #ffffff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient( #f2f2f2, #ffffff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient( #f2f2f2, #ffffff); /* Standard syntax (must be last) */
+	-webkit-transition-duration: 0.3s;
+	-moz-transition-duration: 0.3s;
+	-o-transition-duration: 0.3s;
+	transition-duration: 0.3s;
+}
+
+
+#error-message h6 {
+	display: block;
+}
+
+
+.closeError {
+	position: relative;
+	display:block;
+	float: right;
 }

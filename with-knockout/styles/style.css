@@ -1,0 +1,289 @@
+html, body { 
+	height: 100%;
+	align-items: center; 
+	font-family: sans-serif; 
+	font-weight: 300;	
+}
+
+
+.container {	
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	background-color: #ffffff;
+	padding: 0px;		
+}
+
+
+header {	
+	display: block;
+	align-items: center;	
+	padding: 0px 15px;
+	background: #ffffff; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient( #f2f2f2, #ffffff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient( #f2f2f2, #ffffff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient( #f2f2f2, #ffffff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient( #f2f2f2, #ffffff); /* Standard syntax (must be last) */
+	border-bottom: 2px solid #999999;
+}
+
+
+#closebutton {
+	float: left;
+	padding-left: 15px;
+	margin-top: 20px;
+}
+
+
+.title h2 {
+	margin-bottom: 20px;
+}
+
+#icon {
+	position: absolute;
+}
+
+
+.map {	
+	height: 100%;
+	-webkit-transition-duration: 0.2s;
+	-moz-transition-duration: 0.2s;
+	-o-transition-duration: 0.2s;
+	transition-duration: 0.2s;	
+}
+
+
+.sidenav {
+    height: 100%;
+    width: 0px;
+    position: fixed;
+    z-index: 3;
+    top: 0;
+    left:0px;
+    background-color: #333333;
+    overflow-x: hidden;
+	padding-top: 60px;  
+	-webkit-transition-duration: 0.2s;
+	-moz-transition-duration: 0.2s;
+	-o-transition-duration: 0.2s;
+	transition-duration: 0.2s;	
+}
+
+
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;	
+}
+
+
+.sidenav a:hover {
+    color: #f1f1f1;
+}
+
+
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 0px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+
+@media screen and (max-height: 350px) {
+  .sidenav {padding-top: 50px;}
+  .sidenav a {font-size: 18px;}
+  .closebtn {top:10px; font-size: 48px;}  
+}
+
+
+@media only screen and (max-width: 610px) {
+  .title h2{font-size: 17px;}
+  #closebutton{margin-top: 10px;}  
+  #search-results h5{font-size: 15px;}
+}
+
+#search {
+	display: block;
+}
+
+#places-search {
+    width: 100%;
+	margin-bottom: 15px;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+    /*background-image: url('searchicon.png');*/
+    background-position: 10px 10px; 
+    background-repeat: no-repeat;
+    padding: 12px 20px;
+}
+
+
+.places-filter {
+	box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px 0px 0px 4px;
+    font-size: 16px;
+    background-color: white;
+    /*background-image: url('searchicon.png');*/
+    background-position: 10px 10px; 
+    background-repeat: no-repeat;
+    padding: 12px 20px;	
+}
+
+
+.filterIcon {
+	border: 1px solid #ccc;
+	border-radius: 0px 4px 4px 0px ;
+	text-align: center;
+	padding: 12px 0px;
+	background: #ffffff; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient( #007acc, #1aa3ff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient( #007acc, #1aa3ff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient( ##007acc, #1aa3ff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient( #007acc, #1aa3ff); /* Standard syntax (must be last) */
+	color: #f1f1f1;	  
+}
+
+
+#filter {
+	display: block;	
+	height: 48px;	
+}
+
+
+#search, #search-results {
+	padding: 10px;
+}
+
+
+#results {
+	list-style-type: none;
+	padding-left: 0px;
+}
+
+
+#results li h5{
+	padding-left: 20px;
+}
+
+#results li:hover {	
+    border-radius: 4px;
+	background: #1aa3ff; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient( #007acc, #1aa3ff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient( #007acc, #1aa3ff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient( ##007acc, #1aa3ff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient( #007acc, #1aa3ff); /* Standard syntax (must be last) */
+}
+
+
+.show {display:block;}
+
+
+#search-results {
+	color: #ffffff;
+}
+
+
+.links {
+	margin: 0px;
+	padding: 10px 0px;
+	cursor: pointer; 
+}
+
+
+#floating-panel {
+	position: absolute;
+	top: 140px;
+	padding: 10px;
+	z-index: 1;	
+	text-align: center;	    
+    padding: 10px;
+}
+
+
+#favourites {	
+	box-sizing: border-box;
+    border: 2px solid #1aa3ff;
+    border-radius: 4px;
+	padding: 10px;
+	background: #ffffff; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient( #007acc, #1aa3ff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient( #007acc, #1aa3ff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient( ##007acc, #1aa3ff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient( #007acc, #1aa3ff); /* Standard syntax (must be last) */
+	color: #f1f1f1;	
+}
+
+
+#pano {
+	display: block;
+	width: 200px;
+	height: 200px;
+	word-wrap: break-word;
+}
+
+
+#name {
+	display: inline-block; 
+	word-wrap: break-word;
+	width: 200px;
+	padding-bottom: 5px;
+	text-align: center;
+	font: 15px arial, sans-serif;
+	font-weight: bold;
+}
+
+#placeInfo {
+	width: 200px;
+	word-wrap: break-word;
+	list-style-type: none;
+	padding-left: 0px;
+	font-weight: bold;
+}
+
+
+#placeInfo li h6{
+	font-family: arial, sans-serif;
+	margin: 5px 0px;
+	font-weight: bold;
+}
+
+
+#error-message {
+	position: absolute;
+	left: 0;
+	right: 0;
+	margin: 0 auto;
+	top:-100px;
+	z-index: 101;
+    width: 400px;
+	border: 1px solid #ff3333;
+    border-radius: 4px;
+	padding: 10px;
+	color: black;	
+	background:  #ffffff; /* For browsers that do not support gradients */
+	-webkit-transition-duration: 0.3s;
+	-moz-transition-duration: 0.3s;
+	-o-transition-duration: 0.3s;
+	transition-duration: 0.3s;
+}
+
+
+#error-message h6 {
+	display: block;
+}
+
+
+.closeError {
+	position: relative;
+	display:block;
+	float: right;
+}

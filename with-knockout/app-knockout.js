@@ -354,7 +354,7 @@ function initMap() {
 		var title = myPlaces[i].title;
 		// Create a marker for each location
 		var marker = new google.maps.Marker({
-			//map: map,
+			map: null,
 			position: position,
 			title: title,
 			animation: google.maps.Animation.DROP,
@@ -449,23 +449,20 @@ function handleError(error){
 
 function MyViewModel() {
     var self = this;
-	
-	self.favMarkers = ko.observableArray();//array updates when new locations add/delete
-	
-    self.favourites = ko.observableArray(myPlaces);  //array updates when new locations add/delete
+		
+    self.favourites = ko.observableArray();  //array updates when new locations add/delete
 	
 	
-	
+	//toogle favourite places on the map and side nav
 	self.addFavouritesToList = function () {
-		if (self.favourites().length != 0) { //this will toggle favourites vfrom the menu
+		if (self.favourites(myPlaces).length != 0) { //this will toggle favourites vfrom the menu
 			self.favourites().forEach(function(place) {	
 				self.place = place;
-				if(self.place.marker != map ) {
+				if(self.place.marker.map != map ) {
 					self.place.marker.setMap(map);						
-				} else {
-					self.favourites('');
+				} else {					
 					self.place.marker.setMap(null);	
-				}
+					self.favourites("");				}
 			});			
 		} else{
 			handleError('Oops, no places in favourites. Go add some...');

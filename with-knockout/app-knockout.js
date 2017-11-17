@@ -452,6 +452,8 @@ function MyViewModel() {
 		
     self.favourites = ko.observableArray();  //array updates when new locations add/delete
 	
+	self.currentPlace = ko.observable();
+	
 	
 	//toogle favourite places on the map and side nav
 	self.addFavouritesToList = function () {
@@ -468,8 +470,16 @@ function MyViewModel() {
 			handleError('Oops, no places in favourites. Go add some...');
 		}		
 	};
+	
+	
+	self.enableBounce = function(place){
+		place.marker.setAnimation(google.maps.Animation.BOUNCE);	
+	}
+	
+	self.disableBounce = function(place){
+		place.marker.setAnimation(null);	
+	}
 
-    
 
 }
 

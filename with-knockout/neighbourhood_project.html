@@ -43,8 +43,8 @@
 					<h5>Our results...</h5>
 					<hr>
 					<ul id="results" data-bind="foreach: favourites">
-					<!-- data-bind="click: bindWithMarkerOnMap" -->
-						<li>
+					<!-- <li  data-bind="click: $parent.enableBounce" working>-->
+						<li  data-bind="event: {mouseover: $parent.enableBounce, mouseout: $parent.disableBounce },mouseoverBubble: false">
 							<h5 class="links" data-bind="text: title "></h5>
 						</li>
 					</ul>

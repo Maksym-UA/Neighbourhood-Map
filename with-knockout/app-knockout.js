@@ -604,7 +604,7 @@ function MyViewModel() {
 		
     self.favourites = ko.observableArray();  //array updates when new locations add/delete
 	
-	self.currentPlace = ko.observable();
+	self.query = ko.observable();
 	
 	
 	//toogle favourite places on the map and side nav
@@ -635,6 +635,10 @@ function MyViewModel() {
 		//alert(place.marker.position);	
 		showInfoWindow(place.marker, markerInfoWindow);
 		searcWithFoursquare(place.marker);
+	}
+	
+	self.filterResults = function(){
+		
 	}
 }
 

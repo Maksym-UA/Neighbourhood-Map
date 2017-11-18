@@ -5,7 +5,7 @@ var map;
 //create empty array to store future markers
 var markers = [];
 
-	
+var markerInfoWindow;	
 	//list my default locations on the map
 var myPlaces = [
 	{title: "Майдан Незалежності", location: {lat: 50.450306, lng: 30.523671}},
@@ -330,7 +330,7 @@ function initMap() {
 	// mouses over the marker.
 	var highlightedIcon = makeMarkerIcon('1aa3ff');
 	
-	var markerInfoWindow = new google.maps.InfoWindow();
+	markerInfoWindow = new google.maps.InfoWindow();
 	
 	// Create a map object, and include the MapTypeId to add
     // to the map type control.
@@ -363,6 +363,7 @@ function initMap() {
 			icon: defaultIcon
 		});
 		
+		//add marker property to each item in myPlaces array
 		myPlaces[i].marker = marker;
 		
 		marker.addListener('mouseover', function() {
@@ -376,9 +377,8 @@ function initMap() {
 		
 		// Create an onclick event to open the large infowindow at each marker.		
 		marker.addListener('click', function(){
-			
 			showInfoWindow(this, markerInfoWindow);
-			//searcWithFoursquare(this);			
+			searcWithFoursquare(this);				
 		});	
 	}
 	
@@ -436,7 +436,6 @@ function closeNav() {
 
 
 function showInfoWindow (marker, markerInfoWindow) {	
-	
 	// Check to make sure the infowindow is not already opened on this marker.
 	if (markerInfoWindow.marker != marker) {
 		// Clear the infowindow content to give the streetview time to load.
@@ -448,8 +447,7 @@ function showInfoWindow (marker, markerInfoWindow) {
 		});
 		
 		var streetViewService = new google.maps.StreetViewService();
-		var radius = 50;
-		
+		var radius = 50;		
 				
 		function processSVData(data, status) {
 			if (status === google.maps.StreetViewStatus.OK) {
@@ -501,6 +499,77 @@ function showInfoWindow (marker, markerInfoWindow) {
         }, 200); */		
 	}
 }
+
+
+function searcWithFoursquare(marker){	
+	//console.log(marker.position.lat());
+	var placeCoordinates = String(marker.position.lat()) + ',' + String(marker.position.lng());
+	
+	//var placeCoordinates = String(marker.position).slice(1, -1).replace(" ", "");
+	//console.log(placeCoordinates);	
+	var query = String(marker.title);
+	
+	var clientID = 'PPCTPSMS0TH5GLA3QSAK0YYH4N0VDQKRDIT0VLKITFHRD2OC';
+	
+	var clientSecret = 'IUYZUMGIA0EJFDRYDGMYOGUYPRSFCDZFNZST5R0DE3RBFZYO';
+	
+	var foursquareUrl = 'https://api.foursquare.com/v2/venues/search?ll=' + placeCoordinates +
+	
+	'&query=' + query + '&radius=150&limit=1&' + 
+	'client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20170801';
+	//console.log(foursquareUrl);
+	
+	// no error handing method for jsonp so we need walkaround with timeout for the request
+	var fourSquareRequestTimeout = setTimeout(function(){
+		handleError("Failed to fetch Foursquare results");
+	}, 1000);
+	
+	$.ajax({
+		type: "GET",
+		dataType: "jsonp",
+		cache: false,
+		url: foursquareUrl,
+		success: function(data){
+			var result = data.response.venues[0];
+			console.log(result);			
+			//get place details	
+			var category = result.categories[0].name;
+			var address = result.location.address;
+			var contact = result.contact.phone;
+			var foursquareMemebersNow = result.hereNow.count;
+			var totalPeopleVisited = result.stats.usersCount;
+						
+			var placeDetails = {
+				category: 'Category: ' + category,
+				address: 'Address: ' + address,
+				phone: 'Phone: ' + contact,
+				visitors: 'Foursquare members now: ' + foursquareMemebersNow,
+				totalVisitors: 'Total number of visitors: ' + totalPeopleVisited				
+			}
+			
+			var info = document.getElementById('placeInfo');	
+			//clear old listings
+			info.innerHTML = '';
+				
+			for (var property in placeDetails){	
+				if (placeDetails.hasOwnProperty(property)) {
+					var elem = document.createElement('li');
+					var item = document.createElement('h6');
+					// Set its content
+					item.append(document.createTextNode(placeDetails[property]));
+					//add it to h6
+					elem.appendChild(item);
+					// Add it to the ul
+					info.appendChild(elem);	
+				} else {
+					handleError('No place data found.');
+				}
+			}		
+			clearTimeout(fourSquareRequestTimeout);		
+		} 
+	});		
+}
+
 
 function handleError(error){
 	var errorContainer = document.getElementById('error-message');	
@@ -556,9 +625,10 @@ function MyViewModel() {
 		place.marker.setAnimation(null);	
 	}
 
-	self.openInfoWindow = function(place){
-		alert(place.marker.position);	
-		showInfoWindow(place.marker, initMap.markerInfoWindow);
+	self.openInfoWindow = function(place){		
+		//alert(place.marker.position);	
+		showInfoWindow(place.marker, markerInfoWindow);
+		searcWithFoursquare(place.marker);
 	}
 }
 

@@ -378,7 +378,7 @@ function initMap() {
 		// Create an onclick event to open the large infowindow at each marker.		
 		marker.addListener('click', function(){
 			showInfoWindow(this, markerInfoWindow);
-			searcWithFoursquare(this);				
+			searchWithFoursquare(marker);		
 		});	
 	}
 	
@@ -457,6 +457,8 @@ function showInfoWindow (marker, markerInfoWindow) {
 				markerInfoWindow.setContent('<div id="name">' + marker.title + 
 				'</div><div id="pano"></div><div><ul id="placeInfo"></ul></div>' + 
 				'<div id"fousquare"><a href="https://developer.foursquare.com/">Powered by Foursquare API</a></div>');
+				
+				
 								
 				var panorama = new google.maps.StreetViewPanorama(
 					document.getElementById('pano'), {
@@ -475,7 +477,10 @@ function showInfoWindow (marker, markerInfoWindow) {
 				markerInfoWindow.setContent('<div>' + marker.title + '</div>' +
 				'<div>No Street View Found</div>');
 			}		
-		}		
+		}
+		
+		searchWithFoursquare(marker);
+		
 		// Look for a nearby Street View panorama when the map is clicked.
         // getPanoramaByLocation will return the nearest pano when the
         // given radius is 50 meters or less.
@@ -501,7 +506,8 @@ function showInfoWindow (marker, markerInfoWindow) {
 }
 
 
-function searcWithFoursquare(marker){	
+
+function searchWithFoursquare(marker){	
 	//console.log(marker.position.lat());
 	var placeCoordinates = String(marker.position.lat()) + ',' + String(marker.position.lng());
 	
@@ -555,11 +561,11 @@ function searcWithFoursquare(marker){
 				if (placeDetails.hasOwnProperty(property)) {
 					var elem = document.createElement('li');
 					var item = document.createElement('h6');
-					// Set its content
+					// Set its contents:
 					item.append(document.createTextNode(placeDetails[property]));
-					//add it to h6
+					//add it to h5
 					elem.appendChild(item);
-					// Add it to the ul
+					// Add it to the list:
 					info.appendChild(elem);	
 				} else {
 					handleError('No place data found.');

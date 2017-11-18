@@ -44,7 +44,7 @@
 					<hr>
 					<ul id="results" data-bind="foreach: favourites">
 					<!-- <li  data-bind="click: $parent.enableBounce" working>-->
-						<li  data-bind="event: {mouseover: $parent.enableBounce, mouseout: $parent.disableBounce },mouseoverBubble: false">
+						<li  data-bind="click: $parent.openInfoWindow, event: {mouseover: $parent.enableBounce, mouseout: $parent.disableBounce },mouseoverBubble: false">
 							<h5 class="links" data-bind="text: title "></h5>
 						</li>
 					</ul>

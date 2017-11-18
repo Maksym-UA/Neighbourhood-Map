@@ -330,6 +330,8 @@ function initMap() {
 	// mouses over the marker.
 	var highlightedIcon = makeMarkerIcon('1aa3ff');
 	
+	var markerInfoWindow = new google.maps.InfoWindow();
+	
 	// Create a map object, and include the MapTypeId to add
     // to the map type control.
 	map = new google.maps.Map(document.getElementsByClassName('map')[0],{
@@ -371,6 +373,13 @@ function initMap() {
 		marker.addListener('mouseout', function() {
             this.setIcon(defaultIcon);		
         });		
+		
+		// Create an onclick event to open the large infowindow at each marker.		
+		marker.addListener('click', function(){
+			
+			showInfoWindow(this, markerInfoWindow);
+			//searcWithFoursquare(this);			
+		});	
 	}
 	
 	console.log(myPlaces);		
@@ -425,6 +434,74 @@ function closeNav() {
 	document.getElementsByClassName("map")[0].style.width = "100%";
 }
 
+
+function showInfoWindow (marker, markerInfoWindow) {	
+	
+	// Check to make sure the infowindow is not already opened on this marker.
+	if (markerInfoWindow.marker != marker) {
+		// Clear the infowindow content to give the streetview time to load.
+		markerInfoWindow.setContent('');
+		markerInfoWindow.marker = marker;
+		// Make sure the marker property is cleared if the infowindow is closed.
+		markerInfoWindow.addListener('closeclick', function() {
+			markerInfoWindow.marker = null;
+		});
+		
+		var streetViewService = new google.maps.StreetViewService();
+		var radius = 50;
+		
+				
+		function processSVData(data, status) {
+			if (status === google.maps.StreetViewStatus.OK) {
+				var streetViewLocation = data.location.latLng;
+				
+				var viewHeading = google.maps.geometry.spherical.computeHeading(streetViewLocation, marker.position);
+				markerInfoWindow.setContent('<div id="name">' + marker.title + 
+				'</div><div id="pano"></div><div><ul id="placeInfo"></ul></div>' + 
+				'<div id"fousquare"><a href="https://developer.foursquare.com/">Powered by Foursquare API</a></div>');
+								
+				var panorama = new google.maps.StreetViewPanorama(
+					document.getElementById('pano'), {
+						position: streetViewLocation,
+						pov: {
+							heading: viewHeading,
+							pitch: 25
+						},
+						motionTrackingControlOptions: {
+							position: google.maps.ControlPosition.LEFT_BOTTOM
+						},
+						addressControl: false,
+						fullscreenControl: false						
+					});				
+			} else {
+				markerInfoWindow.setContent('<div>' + marker.title + '</div>' +
+				'<div>No Street View Found</div>');
+			}		
+		}		
+		// Look for a nearby Street View panorama when the map is clicked.
+        // getPanoramaByLocation will return the nearest pano when the
+        // given radius is 50 meters or less.
+		
+		// Use streetview service to get the closest streetview image within
+		// 50 meters of the markers position
+		streetViewService.getPanoramaByLocation(marker.position, radius, processSVData);
+		
+		map.setZoom(14);
+		map.setCenter(marker.getPosition());
+		//move the map down so the infowindow is seen in full
+		map.panBy(0, -200);		
+		
+		//markerInfoWindow.setContent(marker.title);
+		// Open the infowindow on the correct marker.
+		markerInfoWindow.open(map, marker);
+		
+		/* // .2 seconds after the center of the map has changed, pan back to the marker.
+		window.setTimeout(function() {
+            map.panTo(marker.getPosition());
+        }, 200); */		
+	}
+}
+
 function handleError(error){
 	var errorContainer = document.getElementById('error-message');	
 	//clear old listings
@@ -471,7 +548,6 @@ function MyViewModel() {
 		}		
 	};
 	
-	
 	self.enableBounce = function(place){
 		place.marker.setAnimation(google.maps.Animation.BOUNCE);	
 	}
@@ -480,7 +556,10 @@ function MyViewModel() {
 		place.marker.setAnimation(null);	
 	}
 
-
+	self.openInfoWindow = function(place){
+		alert(place.marker.position);	
+		showInfoWindow(place.marker, initMap.markerInfoWindow);
+	}
 }
 
 var vm = new MyViewModel();

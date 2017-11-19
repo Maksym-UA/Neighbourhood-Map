@@ -382,7 +382,7 @@ function initMap() {
 		});	
 	}
 	
-	console.log(myPlaces);		
+	//console.log(myPlaces);		
 
 	//close side panel
 	document.getElementsByClassName('closebtn')[0].addEventListener('click', closeNav);	
@@ -601,27 +601,34 @@ function handleError(error){
 
 function MyViewModel() {
     var self = this;
-		
-    self.favourites = ko.observableArray();  //array updates when new locations add/delete
 	
-	self.query = ko.observable();
+    self.placesList = ko.observableArray();  //array updates when new locations add/delete
+	
+	self.query = ko.observable("");
+	
+	
 	
 	
 	//toogle favourite places on the map and side nav
 	self.addFavouritesToList = function () {
-		if (self.favourites(myPlaces).length != 0) { //this will toggle favourites vfrom the menu
-			self.favourites().forEach(function(place) {	
-				self.place = place;
+		if (self.placesList(myPlaces).length != 0) { //this will toggle favourites vfrom the menu
+			self.placesList().forEach(function(place) {	
+				self.place = place;				
+				
 				if(self.place.marker.map != map ) {
 					self.place.marker.setMap(map);						
 				} else {					
 					self.place.marker.setMap(null);	
-					self.favourites("");				}
-			});			
+					self.placesList("");				}
+			});	
+			return self.placesList(myPlaces);		
 		} else{
 			handleError('Oops, no places in favourites. Go add some...');
 		}		
 	};
+	
+	console.log('after sidenav' + self.placesList);
+	
 	
 	self.enableBounce = function(place){
 		place.marker.setAnimation(google.maps.Animation.BOUNCE);	
@@ -634,13 +641,42 @@ function MyViewModel() {
 	self.openInfoWindow = function(place){		
 		//alert(place.marker.position);	
 		showInfoWindow(place.marker, markerInfoWindow);
-		searcWithFoursquare(place.marker);
 	}
 	
-	self.filterResults = function(){
+	
+	//self.filterResults = ko.computed(function(){
+	self.filterResults = ko.dependentObservable(function(){	
+		var filter = self.query().toLowerCase();
+		self.filteredList = ko.observableArray();
 		
-	}
+		if (!filter){
+			return self.placesList();
+		} else {	
+			console.log('\n'+filter);
+			return ko.utils.arrayFilter(self.placesList(), function(place) {
+				return place.title.toLowerCase().indexOf(filter) >= 0;
+			});
+			
+				
+		}		
+	}); 
+	
+	
+	
+	
+	//--------------------
+	
+/* 	self.filterResults = ko.computed(function() {
+                return ko.utils.arrayFilter(self.placesList(), function(place) {
+                    return place.title.toLowerCase().indexOf(filter) >= 0;
+                });
+            });
+	 */
+	
+	//self.filterResults = ko.observable();
+	//self.filterResults(false);
 }
 
 var vm = new MyViewModel();
 ko.applyBindings(vm);
+vm.query.subscribe(vm.filterResults);

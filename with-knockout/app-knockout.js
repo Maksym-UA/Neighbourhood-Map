@@ -607,19 +607,14 @@ function MyViewModel() {
 	self.query = ko.observable("");
 	
 	
-	
-	
 	//toogle favourite places on the map and side nav
 	self.addFavouritesToList = function () {
 		if (self.placesList(myPlaces).length != 0) { //this will toggle favourites vfrom the menu
 			self.placesList().forEach(function(place) {	
 				self.place = place;				
 				
-				if(self.place.marker.map != map ) {
-					self.place.marker.setMap(map);						
-				} else {					
-					self.place.marker.setMap(null);	
-					self.placesList("");				}
+				self.place.marker.setMap(map);						
+				
 			});	
 			return self.placesList(myPlaces);		
 		} else{
@@ -646,15 +641,23 @@ function MyViewModel() {
 	
 	//self.filterResults = ko.computed(function(){
 	self.filterResults = ko.dependentObservable(function(){	
-		var filter = self.query().toLowerCase();
-		self.filteredList = ko.observableArray();
+		var filter = self.query().toLowerCase();		
 		
 		if (!filter){
+			self.placesList().forEach(function(place) {	
+				place.marker.setVisible(true);
+			});
 			return self.placesList();
 		} else {	
 			console.log('\n'+filter);
 			return ko.utils.arrayFilter(self.placesList(), function(place) {
-				return place.title.toLowerCase().indexOf(filter) >= 0;
+				if (place.title.toLowerCase().indexOf(filter) >= 0){
+					place.marker.setVisible(true);
+					return true
+				} else{
+					place.marker.setVisible(false);
+				}
+				
 			});
 			
 				

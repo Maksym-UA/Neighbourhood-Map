@@ -523,6 +523,7 @@ function initAutocomplete(input, markerInfoWindow) {
 		//get request response
 		var places = searchBox.getPlaces();		
 		if (places.length == 0) {
+			//display message to user
 			handleError("No places matching the query found");
 			return;
 		} 
@@ -593,29 +594,30 @@ function initAutocomplete(input, markerInfoWindow) {
 	});		
 } 
 
-function searchWithFoursquare(marker){	
-	//console.log(marker.position.lat());
+//search for place additional details with Fousquare API
+function searchWithFoursquare(marker){
+	//get place coordinater
 	var placeCoordinates = String(marker.position.lat()) + ',' + String(marker.position.lng());
 	
-	//var placeCoordinates = String(marker.position).slice(1, -1).replace(" ", "");
-	//console.log(placeCoordinates);	
+	//get parameters for the request
 	var query = String(marker.title);
 	
 	var clientID = 'PPCTPSMS0TH5GLA3QSAK0YYH4N0VDQKRDIT0VLKITFHRD2OC';
 	
 	var clientSecret = 'IUYZUMGIA0EJFDRYDGMYOGUYPRSFCDZFNZST5R0DE3RBFZYO';
 	
+	//generate url request
 	var foursquareUrl = 'https://api.foursquare.com/v2/venues/search?ll=' + placeCoordinates +
 	
 	'&query=' + query + '&radius=150&limit=1&' + 
 	'client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20170801';
-	//console.log(foursquareUrl);
-	
+		
 	// no error handing method for jsonp so we need walkaround with timeout for the request
 	var fourSquareRequestTimeout = setTimeout(function(){
 		handleError("Failed to fetch Foursquare results");
 	}, 1000);
 	
+	//make an ajax async request
 	$.ajax({
 		type: "GET",
 		dataType: "jsonp",
@@ -623,14 +625,15 @@ function searchWithFoursquare(marker){
 		url: foursquareUrl,
 		success: function(data){
 			var result = data.response.venues[0];
-			//console.log(result);			
+			
 			//get place details	
 			var category = result.categories[0].name;
 			var address = result.location.address;
 			var contact = result.contact.phone;
 			var foursquareMemebersNow = result.hereNow.count;
 			var totalPeopleVisited = result.stats.usersCount;
-						
+			
+			//create new object with details			
 			var placeDetails = {
 				category: 'Category: ' + category,
 				address: 'Address: ' + address,
@@ -639,6 +642,7 @@ function searchWithFoursquare(marker){
 				totalVisitors: 'Total number of visitors: ' + totalPeopleVisited				
 			}
 			
+			//add the info to infowindow div
 			var info = document.getElementById('placeInfo');	
 			//clear old listings
 			info.innerHTML = '';
@@ -662,8 +666,9 @@ function searchWithFoursquare(marker){
 	});		
 }
 
-
+//function to inform user of errors
 function handleError(error){
+	//get error container
 	var errorContainer = document.getElementById('error-message');	
 	//clear old listings
 	errorContainer.innerHTML = "";
@@ -674,12 +679,14 @@ function handleError(error){
 	// Add it to the error container:
     errorContainer.appendChild(item);	
 	
+	//create button to close the message
 	var errorButton = document.createElement('button');
 	errorButton.appendChild(document.createTextNode("Ok"));
 	errorButton.classList.add("closeError");
-	errorContainer.appendChild(errorButton);	
-	errorContainer.style.top = "100px"; 
+	errorContainer.appendChild(errorButton);
 	
+	//animate the message by sliding down/up
+	errorContainer.style.top = "100px"; 
 	errorButton.addEventListener('click', function(){
 		errorContainer.style.top = "-100px"; 
 	});	
@@ -688,20 +695,17 @@ function handleError(error){
 function MyViewModel() {
     var self = this;
 	
+    self.placesList = ko.observableArray();  
 	
-    self.placesList = ko.observableArray();  //array updates when new locations add/delete
-	
+	//query for filtering the results
 	self.query = ko.observable("");
-	
-	
-	//toogle favourite places on the map and side nav
-	self.toggleFavourites = function () {
-		if (self.placesList(myPlaces).length != 0) { //this will toggle favourites vfrom the menu
+		
+	//add favourite places on the map and side nav
+	self.addFavourites = function () {
+		if (self.placesList(myPlaces).length != 0) {
 			self.placesList().forEach(function(place) {	
-				self.place = place;
-				
-				self.place.marker.setMap(map);						
-				
+				self.place = place;				
+				self.place.marker.setMap(map);				
 			});	
 			return self.placesList();		
 		} else{
@@ -709,34 +713,31 @@ function MyViewModel() {
 		}		
 	};
 	
+	//make marker bounce when hover in listing section
 	self.enableBounce = function(place){
 		place.marker.setAnimation(google.maps.Animation.BOUNCE);	
 	}
 	
+	//make marker still when hover out of the listing section
 	self.disableBounce = function(place){
 		place.marker.setAnimation(null);	
 	}
 
+	//click event to show place infowindow
 	self.openInfoWindow = function(place){		
-		//alert(place.marker.position);	
 		showInfoWindow(place.marker, markerInfoWindow);
 	}
 	
-	//self.filterResults = ko.computed(function(){
-	self.filterResults = ko.dependentObservable(function(){	
+	//filter the results with user query
+	self.filterResults = ko.computed(function(){	
 		var filter = self.query().toLowerCase();
-		
-		/* if (searchResults.length != 0){
-			self.placesList(searchResults);
-		} */
-
 		if (!filter){
 			self.placesList().forEach(function(place) {	
 				place.marker.setVisible(true);
 			});
 			return self.placesList();
 		} else {	
-			console.log('\n'+filter);
+			//return results matching the query
 			return ko.utils.arrayFilter(self.placesList(), function(place) {
 				if (place.title.toLowerCase().indexOf(filter) >= 0){
 					place.marker.setVisible(true);
@@ -746,22 +747,8 @@ function MyViewModel() {
 				}				
 			});				
 		}		
-	}); 
-	
-	
-	//--------------------
-	
-/* 	self.filterResults = ko.computed(function() {
-                return ko.utils.arrayFilter(self.placesList(), function(place) {
-                    return place.title.toLowerCase().indexOf(filter) >= 0;
-                });
-            });
-	 */
-	
-	//self.filterResults = ko.observable();
-	//self.filterResults(false);
+	}); 	
 }
 
 var vm = new MyViewModel();
 ko.applyBindings(vm);
-vm.query.subscribe(vm.filterResults);

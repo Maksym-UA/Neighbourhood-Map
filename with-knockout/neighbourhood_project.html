@@ -37,7 +37,7 @@
 					<div id="filter">						
 						<input class="col-xs-9 col-sm-10 col-md-10 places-filter" data-bind="textInput: query" type="text" name="filter" >
 						<button class="col-xs-3 col-sm-2 col-md-2 filterIcon">Filter</button>	
-						<p style="display:block; color:white; margin-top: 5px;"> You entered : <span data-bind = "text: query"/></p>
+						
 					</div>					
 				</div>
 				<div id="search-results">
@@ -53,7 +53,7 @@
 			</div>
 
 			<div id="floating-panel">
-				<button id="favourites" data-bind="click: $root.addFavouritesToList">Favourites</button>
+				<button id="favourites" data-bind="click: $root.toggleFavourites">Favourites</button>
 			</div>				
 			<div class="col-xs-12 col-sm-12 col-md-12 map" ></div>			
 		</div>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="description" content="Neighbourhood Map"/>
+		<meta name="Maksym Savin" content="//pydega.com">
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="mobile-web-app-capable" content="yes">
+
+		<title>Neighbourhood Map</title>
+		
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<!-- <link rel="stylesheet" href="styles/bootstrap.min.css"> -->
+		<link rel="stylesheet" href="styles/normalize.css">
+		<link rel="stylesheet" href="styles/style.css">
+	</head>
+	
+	<body>
+		<div class="col-xs-12 col-sm-12 col-md-12 container">
+			<header>
+				<div class="row">
+					<div id="icon">
+						<span id="closebutton" style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+					</div>
+					<div class="title text-center">
+						<h2>Search for the places you like </h2>
+					</div>
+					<div id="error-message"></div>
+				</div>				
+			</header>			
+			
+			<div id="mySidenav" class="sidenav">
+				<a href="javascript:void(0)" class="closebtn">&times;</a>
+				 <div id="search">				 
+					<input id="places-search" data-bind=""  type="text" name="search" placeholder="Search online...">						
+					<div id="filter">						
+						<input class="col-xs-9 col-sm-10 col-md-10 places-filter" data-bind="textInput: query" type="text" name="filter" >
+						<button class="col-xs-3 col-sm-2 col-md-2 filterIcon">Filter</button>	
+						
+					</div>					
+				</div>
+				<div id="search-results">
+					<h5>Our results...</h5>
+					<hr>
+					<ul id="results" data-bind="foreach: filterResults">
+					<!-- <li  data-bind="click: $parent.enableBounce" working>-->
+						<li  data-bind=" click: $parent.openInfoWindow, event: {mouseover: $parent.enableBounce, mouseout: $parent.disableBounce },mouseoverBubble: false">
+							<h5 class="links" data-bind="text: title "></h5>
+						</li>
+					</ul>
+				</div>
+			</div>
+
+			<div id="floating-panel">
+				<button id="favourites" data-bind="click: $root.addFavourites">Favourites</button>
+			</div>				
+			<div class="col-xs-12 col-sm-12 col-md-12 map" ></div>			
+		</div>
+		
+		<script async defer
+			src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry,drawing&key=AIzaSyD8luDRRwk3B6s8352Xo2cpcRM7NTNtPnA&v=3&callback=initMap">
+		</script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="js/lib/knockout-3.2.0.js"></script>
+		<script src="js/app-knockout.js"></script>
+	</body>
+</html>

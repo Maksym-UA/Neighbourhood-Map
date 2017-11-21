@@ -18,7 +18,7 @@ framework to handle filtering and listing.
 
 ### Modification
 
--You are free to make changes to the source code. All the necessary libraries are already placed in `js/lib` directory. 
+- You are free to make changes to the source code. All the necessary libraries are already placed in `js/lib` directory. 
 Simply download all the files from the repository and you are ready to go.
 - If you are not familiar with Knockout I recommend to go through their [tutorials](http://learn.knockoutjs.com/)
 
@@ -38,4 +38,3 @@ Simply download all the files from the repository and you are ready to go.
 Please send you feedback to
 
   max.savin3@gmail.com
-

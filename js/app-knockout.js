@@ -39,7 +39,7 @@ var myPlaces = [
 
 function initMap() {	
 	//create empty array to store future markers
-	var markers = [];
+	
 
 	// Create a new StyledMapType object, passing it an array of styles,
 	// and the name to be displayed on the map type control.
@@ -368,23 +368,25 @@ function initMap() {
 		});
 		
 		//add marker property to each item in myPlaces array
-		myPlaces[i].marker = marker;
-		
-		//add even listener to a marker
-		marker.addListener('mouseover', function() {
+		myPlaces[i].marker = marker;		
+	}
+	
+	//add even listener to a marker
+	myPlaces.forEach(function(place) {
+		place.marker.addListener('mouseover', function() {
             this.setIcon(highlightedIcon);						
         });
 		
-		marker.addListener('mouseout', function() {
+		place.marker.addListener('mouseout', function() {
             this.setIcon(defaultIcon);		
         });		
 		
 		// Create an onclick event to open the large infowindow at each marker		
-		marker.addListener('click', function(){
+		place.marker.addListener('click', function(){
 			showInfoWindow(this, markerInfoWindow);
 			searchWithFoursquare(marker);		
 		});	
-	}
+	});
 	
 	//close side panel
 	document.getElementsByClassName('closebtn')[0].addEventListener('click', closeNav);	
@@ -445,61 +447,62 @@ function showInfoWindow (marker, markerInfoWindow) {
 		// Clear the infowindow content to give the streetview time to load.
 		markerInfoWindow.setContent('');
 		markerInfoWindow.marker = marker;
-		// Make sure the marker property is cleared if the infowindow is closed.
-		markerInfoWindow.addListener('closeclick', function() {
-			markerInfoWindow.marker = null;
-		});
-		
-		//create new streetview object and set its radius
-		var streetViewService = new google.maps.StreetViewService();
-		var radius = 50;		
-		
-		//process a GoogleMaps response
-		function processSVData(data, status) {
-			if (status === google.maps.StreetViewStatus.OK) {
-				var streetViewLocation = data.location.latLng;
-				
-				//add response results to the DOM
-				var viewHeading = google.maps.geometry.spherical.computeHeading(streetViewLocation, marker.position);
-				markerInfoWindow.setContent('<div id="name">' + marker.title + 
-				'</div><div id="pano"></div><div><ul id="placeInfo"></ul></div>' + 
-				'<div id"fousquare"><a href="https://developer.foursquare.com/">Powered by Foursquare API</a></div>');
-			
-				var panorama = new google.maps.StreetViewPanorama(
-					document.getElementById('pano'), {
-						position: streetViewLocation,
-						pov: {
-							heading: viewHeading,
-							pitch: 25
-						},
-						motionTrackingControlOptions: {
-							position: google.maps.ControlPosition.LEFT_BOTTOM
-						},
-						addressControl: false,
-						fullscreenControl: false						
-					});				
-			} else {
-				markerInfoWindow.setContent('<div>' + marker.title + '</div>' +
-				'<div>No Street View Found</div>');
-			}		
-		}
-		
-		//perform search for place details with FoursquareAPI
-		searchWithFoursquare(marker);
-		
-		// Use streetview service to get the closest streetview image within
-		// 50 meters of the markers position
-		streetViewService.getPanoramaByLocation(marker.position, radius, processSVData);
-		
-		//set map zoom and center values
-		map.setZoom(14);
-		map.setCenter(marker.getPosition());
-		//move the map down so the infowindow is seen in full
-		map.panBy(0, -200);		
-		
-		// Open the infowindow on the correct marker.
-		markerInfoWindow.open(map, marker);		
 	}
+	// Make sure the marker property is cleared if the infowindow is closed.
+	markerInfoWindow.addListener('closeclick', function() {
+		markerInfoWindow.marker = null;
+	});
+	
+	//create new streetview object and set its radius
+	var streetViewService = new google.maps.StreetViewService();
+	var radius = 50;		
+	
+	//process a GoogleMaps response
+	function processSVData(data, status) {
+		if (status === google.maps.StreetViewStatus.OK) {
+			var streetViewLocation = data.location.latLng;
+			
+			//add response results to the DOM
+			var viewHeading = google.maps.geometry.spherical.computeHeading(streetViewLocation, marker.position);
+			markerInfoWindow.setContent('<div id="name">' + marker.title + 
+			'</div><div id="pano"></div><div><ul id="placeInfo"></ul></div>' + 
+			'<div id"fousquare"><a href="https://developer.foursquare.com/">Powered by Foursquare API</a></div>');
+		
+			var panorama = new google.maps.StreetViewPanorama(
+				document.getElementById('pano'), {
+					position: streetViewLocation,
+					pov: {
+						heading: viewHeading,
+						pitch: 25
+					},
+					motionTrackingControlOptions: {
+						position: google.maps.ControlPosition.LEFT_BOTTOM
+					},
+					addressControl: false,
+					fullscreenControl: false						
+				});				
+		} else {
+			markerInfoWindow.setContent('<div>' + marker.title + '</div>' +
+			'<div>No Street View Found</div>');
+		}		
+	}
+	
+	//perform search for place details with FoursquareAPI
+	searchWithFoursquare(marker);
+	
+	// Use streetview service to get the closest streetview image within
+	// 50 meters of the markers position
+	streetViewService.getPanoramaByLocation(marker.position, radius, processSVData);
+	
+	//set map zoom and center values
+	map.setZoom(14);
+	map.setCenter(marker.getPosition());
+	//move the map down so the infowindow is seen in full
+	map.panBy(0, -200);		
+	
+	// Open the infowindow on the correct marker.
+	markerInfoWindow.open(map, marker);		
+	
 }
 
 //request to perform GoogleMaps search
@@ -524,7 +527,7 @@ function initAutocomplete(input, markerInfoWindow) {
 		
 		//get request response
 		var places = searchBox.getPlaces();		
-		if (places.length == 0) {
+		if (places.length === 0) {
 			//display message to user
 			handleError("No places matching the query found");
 			return;
@@ -544,7 +547,7 @@ function initAutocomplete(input, markerInfoWindow) {
 			places.forEach(function(place) {			
 				if (!place.geometry) {
 					console.log("Returned place contains no geometry");
-					handleError("Could not locate the place you search. Check your request.")
+					handleError("Could not locate the place you search. Check your request.");
 					return;
 				}		   
 				// Create a marker for each place.
@@ -561,7 +564,7 @@ function initAutocomplete(input, markerInfoWindow) {
 					title: marker.title,
 					location: marker.position,
 					marker: marker				
-				}
+				};
 				//add new place to the array
 				searchResults.push(newPlace);				
 				newPlaces.push(newPlace);
@@ -640,7 +643,7 @@ function searchWithFoursquare(marker){
 				phone: 'Phone: ' + contact,
 				visitors: 'Foursquare members now: ' + foursquareMemebersNow,
 				totalVisitors: 'Total number of visitors: ' + totalPeopleVisited				
-			}
+			};
 			
 			//add the info to infowindow div
 			var info = document.getElementById('placeInfo');	
@@ -710,7 +713,7 @@ function MyViewModel() {
 		
 	//add favourite places on the map and side nav
 	self.addFavourites = function () {
-		if (self.placesList(myPlaces).length != 0) {
+		if (self.placesList(myPlaces).length !== 0) {
 			self.placesList().forEach(function(place) {	
 				self.place = place;				
 				self.place.marker.setMap(map);				
@@ -724,17 +727,17 @@ function MyViewModel() {
 	//make marker bounce when hover in listing section
 	self.enableBounce = function(place){
 		place.marker.setAnimation(google.maps.Animation.BOUNCE);	
-	}
+	};
 	
 	//make marker still when hover out of the listing section
 	self.disableBounce = function(place){
 		place.marker.setAnimation(null);	
-	}
+	};
 
 	//click event to show place infowindow
 	self.openInfoWindow = function(place){		
 		showInfoWindow(place.marker, markerInfoWindow);
-	}
+	};
 	
 	//filter the results with user query
 	self.filterResults = ko.computed(function(){	
@@ -749,7 +752,7 @@ function MyViewModel() {
 			return ko.utils.arrayFilter(self.placesList(), function(place) {
 				if (place.title.toLowerCase().indexOf(filter) >= 0){
 					place.marker.setVisible(true);
-					return true
+					return true;
 				} else{
 					place.marker.setVisible(false);
 				}				

@@ -605,9 +605,9 @@ function searchWithFoursquare(marker){
 	//get parameters for the request
 	var query = String(marker.title);
 	
-	var clientID = 'PPCTPSMS0TH5GLA3QSAK0YYH4N0VDQKRDIT0VLKITFHRD2OC';
+	var clientID = 'XXXXX';
 	
-	var clientSecret = 'IUYZUMGIA0EJFDRYDGMYOGUYPRSFCDZFNZST5R0DE3RBFZYO';
+	var clientSecret = 'XXXXX';
 	
 	//generate url request
 	var foursquareUrl = 'https://api.foursquare.com/v2/venues/search?ll=' + placeCoordinates +
